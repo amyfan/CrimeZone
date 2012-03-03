@@ -104,6 +104,8 @@ Thumbs.db
 # afan: for now leaving in some jar files
 # *.jar
 *appengine*.jar
+*datanucleus*.jar
+*geronimo*.jar
 *.rar
 *.tar
 *.zip
