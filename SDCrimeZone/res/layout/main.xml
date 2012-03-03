@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/TextView01"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:text="@string/currLocation" />
+
+    <EditText
+        android:id="@+id/addressText"
+        android:layout_width="300dp"
+        android:layout_height="50dp" >
+
+        <requestFocus />
+    </EditText>
+
+    <TextView
+        android:id="@+id/currentLocationText"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:text="@string/distance" />
+
+    <Spinner
+        android:id="@+id/distanceList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    
+     <TextView
+        android:id="@+id/dateBackToText"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:text="@string/dateBackTo" />
+     
+     <Spinner
+        android:id="@+id/datesList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/submitButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Submit" />
+    
+</LinearLayout>
