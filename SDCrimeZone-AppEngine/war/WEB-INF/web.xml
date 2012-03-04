@@ -8,7 +8,7 @@
   <!-- Servlets -->
   <servlet>
     <servlet-name>greetServlet</servlet-name>
-    <servlet-class>com.crimezone.sd.server.GreetingServiceImpl</servlet-class>
+    <servlet-class>com.crimezone.sd.server.service.GreetingServiceImpl</servlet-class>
   </servlet>
   
   <servlet-mapping>
