@@ -2,7 +2,8 @@
 <resources>
 
     <string name="app_name">SDCrimeZone</string>
-    <string name="currLocation">Current Location</string>
+    <string name="currLocation">Address</string>
+    <string name="defaultLocation">Current Location</string>
     <string name="distance">Distance</string>
     <string name="dateBackTo">Dating Back To</string>
 
