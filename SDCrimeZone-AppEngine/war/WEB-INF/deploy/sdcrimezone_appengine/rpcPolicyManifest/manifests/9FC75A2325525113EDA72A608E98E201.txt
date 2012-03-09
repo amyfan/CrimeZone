@@ -1,0 +1,2 @@
+serviceClass: com.crimezone.sd.client.GreetingService
+path: 2ECB8C110C621F48AB2BC6C5D1CD96C1.gwt.rpc
