@@ -19,6 +19,7 @@ public class Incident {
   private String address;
   private BigDecimal latitude;
   private BigDecimal longitude;
+  private Integer year; // used for queries
 
   public Incident() {
   }
@@ -69,6 +70,14 @@ public class Incident {
 
   public void setLongitude(BigDecimal longitude) {
     this.longitude = longitude;
+  }
+
+  public Integer getYear() {
+    return year;
+  }
+
+  public void setYear(Integer year) {
+    this.year = year;
   }
 
 }

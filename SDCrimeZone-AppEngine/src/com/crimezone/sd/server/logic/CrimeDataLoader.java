@@ -8,11 +8,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Logger;
 
+import com.crimezone.sd.server.domain.AverageIncidentNumber;
 import com.crimezone.sd.server.domain.Incident;
 import com.crimezone.sd.server.persistence.CrimeDataStore;
 
 /**
- * Class to populate the datastore with crime data
+ * Class to populate the datastore with crime data and averages
  * 
  * @author Amy
  * 
@@ -26,7 +27,7 @@ public class CrimeDataLoader {
   private static final int LONGITUDE_INDEX = 5;
   private static final String DATE_FORMAT = "dd/MM/yyyy HH:mm";
 
-  private static final Logger log = Logger.getLogger(CrimeDataManager.class.getName());
+  private static final Logger log = Logger.getLogger(CrimeDataReader.class.getName());
 
   private CrimeDataStore crimeDao;
 
@@ -52,23 +53,29 @@ public class CrimeDataLoader {
     String line;
     try {
       line = incidentFile.readLine();
+      SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
+      SimpleDateFormat yearformat = new SimpleDateFormat("yyyy");
       while (line != null) {
-        Incident incident = new Incident();
-        String[] fields = line.split(",");
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-        String dateString = fields[DATE_INDEX] + " " + fields[TIME_INDEX];
         try {
-          Date date = sdf.parse(dateString);
+          Incident incident = new Incident();
+          String[] fields = line.split(",");
+          String dateString = fields[DATE_INDEX] + " " + fields[TIME_INDEX];
+          Date date = dateFormat.parse(dateString);
+          incident.setYear(Integer.valueOf(yearformat.format(date)));
+
+          incident.setAddress(fields[ADDRESS_INDEX]);
+          incident.setBccCode(fields[BCC_INDEX]);
+          incident.setLatitude(new BigDecimal(fields[LATITUDE_INDEX]));
+          incident.setLongitude(new BigDecimal(fields[LONGITUDE_INDEX]));
+          crimeDao.updateIncident(incident);
         } catch (ParseException e) {
           // TODO Auto-generated catch block
           e.printStackTrace();
           continue;
+        } catch (Exception e) {
+          e.printStackTrace();
+          continue;
         }
-        incident.setAddress(fields[ADDRESS_INDEX]);
-        incident.setBccCode(fields[BCC_INDEX]);
-        incident.setLatitude(new BigDecimal(fields[LATITUDE_INDEX]));
-        incident.setLongitude(new BigDecimal(fields[LONGITUDE_INDEX]));
-        crimeDao.updateIncident(incident);
       }
     } catch (IOException e) {
       // TODO Auto-generated catch block
@@ -80,4 +87,20 @@ public class CrimeDataLoader {
     crimeDao.deleteAllIncidents();
   }
 
+  public Incident updateIncident(Incident incident) {
+    return crimeDao.updateIncident(incident);
+  }
+
+  public void deleteIncident(Incident incident) {
+    crimeDao.deleteIncident(incident.getId());
+  }
+
+  /**
+   * Populate the database with incident averages by radius and year for the
+   * entire city
+   */
+  public void calculateIncidentAverages() {
+    // TODO: logic for calculating averages goes here
+    AverageIncidentNumber average = new AverageIncidentNumber();
+  }
 }
