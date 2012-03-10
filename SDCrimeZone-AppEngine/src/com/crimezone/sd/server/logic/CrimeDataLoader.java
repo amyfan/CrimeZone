@@ -2,7 +2,6 @@ package com.crimezone.sd.server.logic;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -65,8 +64,8 @@ public class CrimeDataLoader {
 
           incident.setAddress(fields[ADDRESS_INDEX]);
           incident.setBccCode(fields[BCC_INDEX]);
-          incident.setLatitude(new BigDecimal(fields[LATITUDE_INDEX]));
-          incident.setLongitude(new BigDecimal(fields[LONGITUDE_INDEX]));
+          incident.setLatitude(new Double(fields[LATITUDE_INDEX]));
+          incident.setLongitude(new Double(fields[LONGITUDE_INDEX]));
           crimeDao.updateIncident(incident);
         } catch (ParseException e) {
           // TODO Auto-generated catch block
