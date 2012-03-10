@@ -15,7 +15,7 @@ public class Incident {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id; // internal PK
   private Date date;
-  private String crimeType;
+  private String bccCode;
   private String address;
   private BigDecimal latitude;
   private BigDecimal longitude;
@@ -39,12 +39,12 @@ public class Incident {
     this.date = date;
   }
 
-  public String getCrimeType() {
-    return crimeType;
+  public String getBccCode() {
+    return bccCode;
   }
 
-  public void setCrimeType(String crimeType) {
-    this.crimeType = crimeType;
+  public void setBccCode(String bccCode) {
+    this.bccCode = bccCode;
   }
 
   public String getAddress() {
