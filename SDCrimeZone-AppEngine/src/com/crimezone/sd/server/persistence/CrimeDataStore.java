@@ -65,6 +65,7 @@ public class CrimeDataStore {
   }
 
   public List<Incident> findIncidentsByYearAndRadius(Integer year, Integer radius) {
+    // TODO: this query is wrong, implement location query data here
     Query<Incident> q = dao.getObjectify().query(Incident.class).filter("year", year)
         .filter("radius", radius);
     return q.list();
