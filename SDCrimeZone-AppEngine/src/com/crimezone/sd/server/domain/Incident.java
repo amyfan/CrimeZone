@@ -1,5 +1,6 @@
 package com.crimezone.sd.server.domain;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -14,10 +15,10 @@ public class Incident {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id; // internal PK
   private Date date;
-  private String address;
   private String crimeType;
-
-  // ... etc.
+  private String address;
+  private BigDecimal latitude;
+  private BigDecimal longitude;
 
   public Incident() {
   }
@@ -52,6 +53,22 @@ public class Incident {
 
   public void setAddress(String address) {
     this.address = address;
+  }
+
+  public BigDecimal getLatitude() {
+    return latitude;
+  }
+
+  public void setLatitude(BigDecimal latitude) {
+    this.latitude = latitude;
+  }
+
+  public BigDecimal getLongitude() {
+    return longitude;
+  }
+
+  public void setLongitude(BigDecimal longitude) {
+    this.longitude = longitude;
   }
 
 }
