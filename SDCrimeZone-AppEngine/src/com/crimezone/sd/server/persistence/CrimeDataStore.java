@@ -69,4 +69,12 @@ public class CrimeDataStore {
     dao.getObjectify().delete(Incident.class, id);
   }
 
+  /**
+   * TODO: verify that this works
+   */
+  public void deleteAllIncidents() {
+    System.out.println("Deleting all Incidents from datastore: ");
+    dao.getObjectify().delete(Incident.class);
+  }
+
 }
