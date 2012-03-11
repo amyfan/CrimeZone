@@ -18,7 +18,6 @@ public class SDCrimeZoneServlet extends HttpServlet {
         resp.setContentType("text/plain");
         resp.getWriter().println("Got request test: " + req.toString());
         
-        
         String lat = checkNull(req.getParameter("lat"));
         String lng = checkNull(req.getParameter("lng"));
         String rad = checkNull(req.getParameter("rad"));
