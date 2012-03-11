@@ -24,7 +24,7 @@ public class CrimeDataLoader {
   private static final int ADDRESS_INDEX = 3;
   private static final int LATITUDE_INDEX = 4;
   private static final int LONGITUDE_INDEX = 5;
-  private static final String DATE_FORMAT = "dd/MM/yyyy HH:mm";
+  private static final String DATE_FORMAT = "M/d/yyyy HH:mm";
 
   private static final Logger log = Logger.getLogger(CrimeDataReader.class.getName());
 
