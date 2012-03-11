@@ -96,4 +96,8 @@ public class CrimeDataStore {
         .filter("year", year).filter("radius", radius);
     return q.list();
   }
+  
+  public int getIncidentCount() {
+    return dao.getObjectify().query(Incident.class).count();
+  }
 }
