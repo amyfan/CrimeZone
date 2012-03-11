@@ -90,6 +90,13 @@ public class CrimeDataStore {
     dao.getObjectify().delete(dao.getObjectify().query(Incident.class).fetchKeys());
   }
 
+  /**
+   * TODO: this query's radius filter is wrong
+   * 
+   * @param year
+   * @param radius
+   * @return
+   */
   public List<AverageIncidentNumber> findAverageIncidentNumbersByYearAndRadius(Integer year,
       Integer radius) {
     Query<AverageIncidentNumber> q = dao.getObjectify().query(AverageIncidentNumber.class)

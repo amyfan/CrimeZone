@@ -60,8 +60,8 @@ public class CrimeDataLoader {
           String[] fields = line.split(",");
           String dateString = fields[DATE_INDEX] + " " + fields[TIME_INDEX];
           Date date = dateFormat.parse(dateString);
-          incident.setYear(Integer.valueOf(yearformat.format(date)));
           incident.setDate(date);
+          incident.setYear(Integer.valueOf(yearformat.format(date)));
           incident.setAddress(fields[ADDRESS_INDEX]);
           incident.setBccCode(fields[BCC_INDEX]);
           incident.setLatitude(new Double(fields[LATITUDE_INDEX]));
@@ -69,7 +69,6 @@ public class CrimeDataLoader {
           crimeDao.updateIncident(incident);
           line = incidentFile.readLine();
         } catch (ParseException e) {
-          // TODO Auto-generated catch block
           e.printStackTrace();
           continue;
         } catch (Exception e) {
@@ -78,7 +77,6 @@ public class CrimeDataLoader {
         }
       }
     } catch (IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
