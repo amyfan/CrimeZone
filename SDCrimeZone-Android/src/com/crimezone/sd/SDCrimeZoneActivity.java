@@ -1,30 +1,21 @@
 package com.crimezone.sd;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
@@ -35,11 +26,14 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -227,18 +221,30 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
 
       for (String bcc : incidentMap.keySet()) {
         this.debug("added " + bcc);
+        /**
+         * Total height per row = 40
+         * height of current bar = 10
+         */
         /* Create a new row to be added. */
         TableRow tr = new TableRow(this);
         tr.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
         /* Create the Crime text to be in the row-content. */
         TextView t = new TextView(this);
         t.setText(bccMap.get(bcc)); // get incident type, based on bcc code
-        LayoutParams params = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
-        params.setMargins(30, 15, 30, 15);
-        t.setLayoutParams(params);
+        LayoutParams tParams = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+        tParams.setMargins(30, 10, 10, 10);
+        t.setLayoutParams(tParams);
+        t.setHeight(20);
+        t.setWidth(100);
+        t.setTypeface(Typeface.SANS_SERIF);
+        t.setTextSize(10f);
+        t.setTextColor(Color.WHITE);
 
         /* Add text to row. */
         tr.addView(t);
+        TableLayout incidentLayout = new TableLayout(this);
+        TableRow incidentCol = new TableRow(this);
+        
         /* Create the bar image to be added */
         ImageView i = new ImageView(this);
 
@@ -252,9 +258,30 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
         this.debug("height= " + bitmap.getHeight());
 
         i.setImageBitmap(bitmap);
-        i.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+        LayoutParams iParams = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+        iParams.setMargins(5, 15, 5, 15);
+        i.setLayoutParams(iParams);
+        i.setScaleType(ScaleType.FIT_START);
+        incidentCol.addView(i);
+        //tr.addView(i);
+        
+        TextView numIncidents = new TextView(this);
+        numIncidents.setText(incidentMap.get(bcc).toString()); // get number of incidents
+        LayoutParams nParams = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+        nParams.setMargins(10, 10, 10, 10);
+        numIncidents.setLayoutParams(tParams);
+        numIncidents.setHeight(20);
+        numIncidents.setWidth(100);
+        numIncidents.setTypeface(Typeface.SANS_SERIF);
+        numIncidents.setTextSize(10f);
+        numIncidents.setTextColor(Color.RED);
+        
+        //tr.addView(numIncidents);
+        incidentCol.addView(numIncidents);
+        incidentLayout.addView(incidentCol);
+        tr.addView(incidentLayout);
+        
         /* Add image to row */
-        tr.addView(i);
         myLayout.addView(tr, new TableLayout.LayoutParams(LayoutParams.FILL_PARENT,
             LayoutParams.WRAP_CONTENT));
       }
@@ -270,14 +297,21 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
    **/
   private JSONArray sendHttpRequestToServer(View v) {
     // get the current GPS coordinates, distance, and dates selected
-    /*
-     * ArrayList<JSONObject> jsonObjs = new ArrayList<JSONObject>(); Random rand
-     * = new Random(); //temp: create some fake data for (int i = 0; i < 30;
-     * i++) { JSONObject ret = new JSONObject(); try { ret.put("address",
-     * "4496 Park Boulevard, San Diego"); ret.put("bcc",
-     * String.valueOf(rand.nextInt(8) + 1)); jsonObjs.add(ret); } catch
-     * (JSONException e) { e.printStackTrace(); } }
-     */
+
+    JSONArray jsonObjs = new JSONArray();
+    Random rand = new Random(); // temp: create some fake data
+    for (int i = 0; i < 30; i++) {
+      JSONObject ret = new JSONObject();
+      try {
+        ret.put("address", "4496 Park Boulevard, San Diego");
+        ret.put("bcc", String.valueOf(rand.nextInt(8) + 1));
+        jsonObjs.put(ret);
+      } catch (JSONException e) {
+        e.printStackTrace();
+      }
+    }
+    return jsonObjs;
+/*
     EditText addr = (EditText) this.findViewById(R.id.addressText);
     Spinner dist = (Spinner) this.findViewById(R.id.distanceList);
     String currentAddress = addr.getText().toString();
@@ -290,11 +324,12 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
     HttpResponse response;
     try {
       HttpClient hc = new DefaultHttpClient();
-      HttpGet get = new HttpGet("http://sdcrimezone.appspot.com/?lat=" + latlong[0]
+      HttpGet get = new HttpGet("http://sdcrimezone.appspot.com/crimeZoneServlet?lat=" + latlong[0]
           + "&lng=" + latlong[1] + "&rad=" + selectedRadius);
 
-      this.debug("HTTPGet = http://sdcrimezone.appspot.com/?lat=" + String.valueOf(latlong[0])
-          + "&lng=" + String.valueOf(latlong[1]) + "&rad=" + selectedRadius);
+      this.debug("HTTPGet = http://sdcrimezone.appspot.com/crimeZoneServlet?lat="
+          + String.valueOf(latlong[0]) + "&lng=" + String.valueOf(latlong[1]) + "&rad="
+          + selectedRadius);
 
       response = hc.execute(get);
 
@@ -318,6 +353,7 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
       e.printStackTrace();
     }
     return null;
+    */
   }
 
   private double[] getLatLong(String strAddress) {
