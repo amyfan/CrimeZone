@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.crimezone.sd.server.domain.AverageIncidentNumber;
 import com.crimezone.sd.server.domain.Incident;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Query;
@@ -58,6 +59,18 @@ public class CrimeDataStore {
     return q.list();
   }
 
+  public List<Incident> findIncidentsByYear(Integer year) {
+    Query<Incident> q = dao.getObjectify().query(Incident.class).filter("year", year);
+    return q.list();
+  }
+
+  public List<Incident> findIncidentsByYearAndRadius(Integer year, Integer radius) {
+    // TODO: this query is wrong, implement location query data here
+    Query<Incident> q = dao.getObjectify().query(Incident.class).filter("year", year)
+        .filter("radius", radius);
+    return q.list();
+  }
+
   public Incident updateIncident(Incident incident) {
     dao.getObjectify().put(incident); // id populated in this statement
     System.out.println("Updated Incident to datastore: " + incident.toString());
@@ -74,7 +87,13 @@ public class CrimeDataStore {
    */
   public void deleteAllIncidents() {
     System.out.println("Deleting all Incidents from datastore: ");
-    dao.getObjectify().delete(Incident.class);
+    dao.getObjectify().delete(dao.getObjectify().query(Incident.class).fetchKeys());
   }
 
+  public List<AverageIncidentNumber> findAverageIncidentNumbersByYearAndRadius(Integer year,
+      Integer radius) {
+    Query<AverageIncidentNumber> q = dao.getObjectify().query(AverageIncidentNumber.class)
+        .filter("year", year).filter("radius", radius);
+    return q.list();
+  }
 }
