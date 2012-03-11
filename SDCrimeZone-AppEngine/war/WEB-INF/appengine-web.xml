@@ -20,6 +20,10 @@
     <include path="**.cache.*" expiration="365d" />
     <exclude path="**.gwt.rpc" />
   </static-files>
+  
+  <resource-files>
+    <include path="/resources/**.txt" />
+  </resource-files>
 
   <!-- Configure java.util.logging -->
   <system-properties>

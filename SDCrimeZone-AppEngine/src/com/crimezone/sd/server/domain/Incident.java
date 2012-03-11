@@ -78,5 +78,9 @@ public class Incident {
   public void setYear(Integer year) {
     this.year = year;
   }
+  
+  public String toString() {
+    return ("ID: " + this.id + "; address: " + this.address + "; type: " + this.bccCode + "; date: " + this.date.toString());
+}
 
 }

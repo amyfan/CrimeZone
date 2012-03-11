@@ -48,7 +48,7 @@ public class CrimeDataLoader {
   }
 
   public void insertIncidents(BufferedReader incidentFile) {
-    // parse byte array and for every row, create a new Incident and persist
+    // parse input file and for every row, create a new Incident and persist
     String line;
     try {
       line = incidentFile.readLine();
@@ -61,12 +61,13 @@ public class CrimeDataLoader {
           String dateString = fields[DATE_INDEX] + " " + fields[TIME_INDEX];
           Date date = dateFormat.parse(dateString);
           incident.setYear(Integer.valueOf(yearformat.format(date)));
-
+          incident.setDate(date);
           incident.setAddress(fields[ADDRESS_INDEX]);
           incident.setBccCode(fields[BCC_INDEX]);
           incident.setLatitude(new Double(fields[LATITUDE_INDEX]));
           incident.setLongitude(new Double(fields[LONGITUDE_INDEX]));
           crimeDao.updateIncident(incident);
+          line = incidentFile.readLine();
         } catch (ParseException e) {
           // TODO Auto-generated catch block
           e.printStackTrace();
