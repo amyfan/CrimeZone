@@ -15,7 +15,13 @@ import com.crimezone.sd.server.domain.Incident;
  */
 public class JSONUtils {
 
-  public static final JSONArray convertToJSONArray(List<Incident> incidents) {
+  /**
+   * TODO: Make this more generic
+   * 
+   * @param incidents
+   * @return
+   */
+  public static final JSONArray convertIncidentsToJSONArray(List<Incident> incidents) {
     JSONArray jsonObjs = new JSONArray();
     for (Incident incident : incidents) {
       JSONObject ret = new JSONObject();

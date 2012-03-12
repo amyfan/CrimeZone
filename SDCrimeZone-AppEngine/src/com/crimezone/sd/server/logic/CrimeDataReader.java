@@ -62,8 +62,10 @@ public class CrimeDataReader {
     return incidents;
   }
 
-  public List<Incident> findIncidentsByYearAndRadius(Integer year, Integer radius) {
-    List<Incident> incidents = crimeDao.findIncidentsByYearAndRadius(year, radius);
+  public List<Incident> findIncidentsByYearAndRadius(Integer year, Double latitude,
+      Double longitude, Integer radius) {
+    List<Incident> incidents = crimeDao.findIncidentsByYearAndRadius(year, latitude, longitude,
+        radius);
     return incidents;
   }
 

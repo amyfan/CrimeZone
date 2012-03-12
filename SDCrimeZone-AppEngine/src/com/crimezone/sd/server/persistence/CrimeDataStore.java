@@ -64,10 +64,10 @@ public class CrimeDataStore {
     return q.list();
   }
 
-  public List<Incident> findIncidentsByYearAndRadius(Integer year, Integer radius) {
+  public List<Incident> findIncidentsByYearAndRadius(Integer year, Double latitute,
+      Double longitude, Integer radius) {
     // TODO: this query is wrong, implement location query data here
-    Query<Incident> q = dao.getObjectify().query(Incident.class).filter("year", year)
-        .filter("radius", radius);
+    Query<Incident> q = dao.getObjectify().query(Incident.class).filter("year", year);
     return q.list();
   }
 
@@ -103,7 +103,7 @@ public class CrimeDataStore {
         .filter("year", year).filter("radius", radius);
     return q.list();
   }
-  
+
   public int getIncidentCount() {
     return dao.getObjectify().query(Incident.class).count();
   }
