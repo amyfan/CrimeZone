@@ -27,6 +27,20 @@ public class SDCrimeZoneServlet extends HttpServlet {
     String lonString = checkNull(req.getParameter("lng"));
     String radString = checkNull(req.getParameter("rad"));
     String yearString = checkNull(req.getParameter("year"));
+    String action = checkNull(req.getParameter("action"));
+
+    // TODO: temp
+    if (action.compareToIgnoreCase("load") == 0) {
+      String serverName = req.getServerName();
+      String url;
+      if (serverName.compareToIgnoreCase("127.0.0.1") == 0
+          || serverName.compareToIgnoreCase("localhost") == 0)
+        url = String.format("http://%s:8888/resources/complete.txt", serverName);
+      else
+        url = "http://sdcrimezone.appspot.com:8888/resources/complete.txt";
+      LoadFile(url);
+    }
+    //
 
     try {
       if (!latString.isEmpty() && !lonString.isEmpty() && !radString.isEmpty()) {
