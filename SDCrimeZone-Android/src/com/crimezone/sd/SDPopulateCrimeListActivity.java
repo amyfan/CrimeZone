@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -14,6 +15,8 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.TableLayout;
@@ -21,7 +24,7 @@ import android.widget.TableRow;
 import android.widget.TableRow.LayoutParams;
 import android.widget.TextView;
 
-public class SDPopulateCrimeListActivity extends Activity {
+public class SDPopulateCrimeListActivity extends Activity implements View.OnClickListener {
   
   /** Called when the activity is first created. */
   @Override
@@ -36,6 +39,28 @@ public class SDPopulateCrimeListActivity extends Activity {
     } catch (JSONException e) {
       e.printStackTrace();
     }
+    Button viewMapButton = (Button) this.findViewById(R.id.viewMapButton);
+    viewMapButton.setOnClickListener(this);
+  }
+  
+  /**
+   * Handles the ViewMaps onclick functions
+   * 
+   * @param v
+   */
+  public void onClick(View v) {
+    if (v.getId() == R.id.viewMapButton) {
+      SDCrimeZoneApplication.debug(this, "opening map");
+      Intent intent = new Intent();
+      Bundle bun = new Bundle();
+
+      bun.putString("results", getIntent().getExtras().getString("results")); // add two parameters: a string and a boolean
+
+      intent.setClass(this, ShowCrimeMapActivity.class);
+      intent.putExtras(bun);
+      startActivity(intent);
+    }
+
   }
   
   public void populateResultsPage(JSONArray results) throws JSONException {

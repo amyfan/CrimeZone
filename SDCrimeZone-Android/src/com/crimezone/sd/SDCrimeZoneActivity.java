@@ -173,6 +173,8 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
       try {
         ret.put("address", "4496 Park Boulevard, San Diego");
         ret.put("bcc", String.valueOf(rand.nextInt(8) + 1));
+        ret.put("lng", "-117.2025731");
+        ret.put("lat", "32.9035252");
         jsonObjs.put(ret);
       } catch (JSONException e) {
         e.printStackTrace();
