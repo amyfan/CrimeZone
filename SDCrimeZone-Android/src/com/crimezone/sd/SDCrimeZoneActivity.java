@@ -147,6 +147,14 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
       Bundle bun = new Bundle();
 
       bun.putString("results", results.toString()); // add two parameters: a string and a boolean
+      EditText addr = (EditText) this.findViewById(R.id.addressText);
+      String currentAddress = addr.getText().toString();
+      double[] latlong = { currLocation.getLatitude(), currLocation.getLongitude() };
+      if (!currentAddress.equals(getString(R.string.defaultLocation))) {
+        latlong = getLatLong(currentAddress);
+      }
+      bun.putString("startLat", String.valueOf(latlong[0]));
+      bun.putString("startLng", String.valueOf(latlong[1]));
 
       intent.setClass(this, SDPopulateCrimeListActivity.class);
       intent.putExtras(bun);

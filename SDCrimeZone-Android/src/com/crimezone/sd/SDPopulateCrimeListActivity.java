@@ -44,7 +44,7 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
   }
   
   /**
-   * Handles the ViewMaps onclick functions
+   * Handles the Crime List onclick functions. For any onclicks in this view.
    * 
    * @param v
    */
@@ -55,7 +55,8 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
       Bundle bun = new Bundle();
 
       bun.putString("results", getIntent().getExtras().getString("results")); // add two parameters: a string and a boolean
-
+      bun.putString("startLat", getIntent().getExtras().getString("startLat"));
+      bun.putString("startLng", getIntent().getExtras().getString("startLng"));
       intent.setClass(this, ShowCrimeMapActivity.class);
       intent.putExtras(bun);
       startActivity(intent);

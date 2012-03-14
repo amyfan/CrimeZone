@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.android.maps.GeoPoint;
+
 import android.app.Application;
 import android.content.Context;
 import android.util.Log;
@@ -36,6 +38,14 @@ public class SDCrimeZoneApplication extends Application{
   
   public static void debug(Context context, String out) {
     Log.v(context.getString(R.string.app_name), out);
+  }
+  
+  public static GeoPoint getGeoPoint (String lat, String lng) {
+    Double dlat = new Double(lat);
+    Double dlng = new Double(lng);
+    int mlat = (int) (dlat.floatValue()*1E6);
+    int mlng = (int) (dlng.floatValue()*1E6);
+    return new GeoPoint(mlat, mlng);
   }
 
 }

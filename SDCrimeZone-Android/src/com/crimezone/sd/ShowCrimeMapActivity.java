@@ -24,7 +24,7 @@ public class ShowCrimeMapActivity extends MapActivity {
   private MapView mapView;
   private LocationManager locationManager;
   private CrimeMapOverlay itemizedoverlay;
-  private static Boolean firstMapOpen = Boolean.TRUE;
+  private GeoUpdateHandler gps;
 
   public void onCreate(Bundle bundle) {
     super.onCreate(bundle);
@@ -38,18 +38,21 @@ public class ShowCrimeMapActivity extends MapActivity {
     } catch (JSONException e) {
       e.printStackTrace();
     }
-
+    String startLat = bun.getString("startLat");
+    String startLng = bun.getString("startLng");
+    GeoPoint currLocation = SDCrimeZoneApplication.getGeoPoint(startLat, startLng);
+    
     // create a map view
     RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.mapViewLayout);
     mapView = (MapView) findViewById(R.id.mapView);
     mapView.setBuiltInZoomControls(true);
     // Either satellite or 2d
-    mapView.setSatellite(true);
+    mapView.setSatellite(false);
     mapController = mapView.getController();
     mapController.setZoom(14); // Zoon 1 is world view
     locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,
-        new GeoUpdateHandler());
+    gps = new GeoUpdateHandler(currLocation);
+    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, gps);
 
     Drawable drawable = this.getResources().getDrawable(R.drawable.point);
     itemizedoverlay = new CrimeMapOverlay(drawable);
@@ -61,6 +64,7 @@ public class ShowCrimeMapActivity extends MapActivity {
         obj = results.getJSONObject(i);
         String lng = obj.get("lng").toString();
         String lat = obj.get("lat").toString();
+        SDCrimeZoneApplication.debug(this, "mapping " + lat + ", " + lng);
         Double myLat = new Double(lat);
         Double myLng = new Double(lng);
         int iLat = (int) (myLat.doubleValue() * 1E6);
@@ -73,6 +77,15 @@ public class ShowCrimeMapActivity extends MapActivity {
     }
 
   }
+  
+  public void onPause() {
+    super.onPause();
+    locationManager.removeUpdates(gps);
+  }
+  
+  public void onDestroy() {
+    super.onDestroy();
+  }
 
   @Override
   protected boolean isRouteDisplayed() {
@@ -80,17 +93,12 @@ public class ShowCrimeMapActivity extends MapActivity {
   }
 
   public class GeoUpdateHandler implements LocationListener {
+    
+    public GeoUpdateHandler(GeoPoint startingLocation) {
+      mapController.animateTo(startingLocation); // mapController.setCenter(point);
+    }
 
     public void onLocationChanged(Location location) {
-      if (firstMapOpen) {
-        int lat = (int) (location.getLatitude() * 1E6);
-        int lng = (int) (location.getLongitude() * 1E6);
-        GeoPoint point = new GeoPoint(lat, lng);
-        // create a marker for current location
-        // createMarker();
-        mapController.animateTo(point); // mapController.setCenter(point);
-        firstMapOpen = Boolean.FALSE;
-      }
     }
 
     public void onProviderDisabled(String provider) {
