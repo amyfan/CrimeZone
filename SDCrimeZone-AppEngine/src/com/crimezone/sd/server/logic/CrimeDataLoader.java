@@ -5,8 +5,11 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
+import com.beoui.geocell.GeocellManager;
+import com.beoui.geocell.model.Point;
 import com.crimezone.sd.server.domain.AverageIncidentNumber;
 import com.crimezone.sd.server.domain.Incident;
 import com.crimezone.sd.server.persistence.CrimeDataStore;
@@ -58,15 +61,26 @@ public class CrimeDataLoader {
         try {
           Incident incident = new Incident();
           String[] fields = line.split(",");
+          
           String dateString = fields[DATE_INDEX] + " " + fields[TIME_INDEX];
           Date date = dateFormat.parse(dateString);
           incident.setDate(date);
           incident.setYear(Integer.valueOf(yearformat.format(date)));
+          
           incident.setAddress(fields[ADDRESS_INDEX]);
+          
           incident.setBccCode(fields[BCC_INDEX]);
-          incident.setLatitude(new Double(fields[LATITUDE_INDEX]));
-          incident.setLongitude(new Double(fields[LONGITUDE_INDEX]));
+          
+          Double latitude = new Double(fields[LATITUDE_INDEX]);
+          Double longitude = new Double(fields[LONGITUDE_INDEX]);
+          incident.setLatitude(latitude);
+          incident.setLongitude(longitude);
+          
+          List<String> cells = GeocellManager.generateGeoCell(new Point(latitude.doubleValue(), longitude.doubleValue()));
+          incident.setGeocells(cells);
+          
           crimeDao.updateIncident(incident);
+          
           line = incidentFile.readLine();
         } catch (ParseException e) {
           e.printStackTrace();

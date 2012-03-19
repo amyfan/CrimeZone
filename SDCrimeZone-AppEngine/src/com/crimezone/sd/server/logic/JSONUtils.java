@@ -3,7 +3,6 @@ package com.crimezone.sd.server.logic;
 import java.util.List;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.crimezone.sd.server.domain.Incident;
@@ -22,6 +21,8 @@ public class JSONUtils {
    * @return
    */
   public static final JSONArray convertIncidentsToJSONArray(List<Incident> incidents) {
+    if (incidents == null)
+      return null;
     JSONArray jsonObjs = new JSONArray();
     for (Incident incident : incidents) {
       JSONObject ret = new JSONObject();
@@ -32,7 +33,7 @@ public class JSONUtils {
         ret.put("lng", incident.getLongitude());
         ret.put("year", incident.getYear());
         jsonObjs.put(ret);
-      } catch (JSONException e) {
+      } catch (Exception e) {
         e.printStackTrace();
       }
     }

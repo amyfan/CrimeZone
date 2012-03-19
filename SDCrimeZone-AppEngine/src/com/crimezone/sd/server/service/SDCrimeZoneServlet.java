@@ -5,16 +5,26 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.jdo.PersistenceManager;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONArray;
 
+import com.beoui.geocell.GeocellManager;
+import com.beoui.geocell.JPALocationCapableRepositorySearchImpl;
+import com.beoui.geocell.LocationCapableRepositorySearch;
+import com.beoui.geocell.model.GeocellQuery;
+import com.beoui.geocell.model.Point;
+import com.crimezone.sd.server.domain.Incident;
 import com.crimezone.sd.server.logic.CrimeDataLoader;
 import com.crimezone.sd.server.logic.CrimeDataReader;
 import com.crimezone.sd.server.logic.JSONUtils;
+import com.crimezone.sd.server.persistence.PMF;
 
 @SuppressWarnings("serial")
 public class SDCrimeZoneServlet extends HttpServlet {
@@ -35,9 +45,9 @@ public class SDCrimeZoneServlet extends HttpServlet {
       String url;
       if (serverName.compareToIgnoreCase("127.0.0.1") == 0
           || serverName.compareToIgnoreCase("localhost") == 0)
-        url = String.format("http://%s:8888/resources/complete.txt", serverName);
+        url = String.format("http://%s:8888/resources/input1.txt", serverName);
       else
-        url = "http://sdcrimezone.appspot.com:8888/resources/complete.txt";
+        url = "http://sdcrimezone.appspot.com/resources/complete.txt";
       LoadFile(url);
     }
     //
@@ -55,8 +65,27 @@ public class SDCrimeZoneServlet extends HttpServlet {
           dataReader.findIncidentsByYearAndRadius(year, latitude, longitude, radius);
         }
 
-        JSONArray jsonArray = JSONUtils.convertIncidentsToJSONArray(null);
-        resp.getWriter().println(jsonArray.toString());
+        // Transform it to a point
+        Point p = new Point((double)latitude, (double)longitude);
+
+        PersistenceManager pm = PMF.get().getPersistenceManager();
+        List<Object> params = new ArrayList<Object>();
+        GeocellQuery baseQuery = new GeocellQuery("", "", params);
+
+        List<Incident> objects = null;
+        try {
+          LocationCapableRepositorySearch<Incident> searchImpl = new JPALocationCapableRepositorySearchImpl<Incident>(baseQuery, pm, Incident.class);
+          objects = GeocellManager.proximityFetch(p, 1000, radius.intValue()*1609, searchImpl );
+            //objects = GeocellManager.proximitySearch(p, 40, 0, Incident.class, baseQuery, pm);
+        } catch (Exception e) {
+          e.printStackTrace();
+            // We catch exception here because we have not configured the PersistentManager (and so the queries won't work)
+        }
+        
+        
+        JSONArray jsonArray = JSONUtils.convertIncidentsToJSONArray(objects);
+        if (jsonArray != null)
+          resp.getWriter().println(jsonArray.toString());
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -75,7 +104,7 @@ public class SDCrimeZoneServlet extends HttpServlet {
           || serverName.compareToIgnoreCase("localhost") == 0)
         url = String.format("http://%s:8888/resources/complete.txt", serverName);
       else
-        url = "http://sdcrimezone.appspot.com:8888/resources/complete.txt";
+        url = "http://sdcrimezone.appspot.com/resources/complete.txt";
       LoadFile(url);
     }
 
