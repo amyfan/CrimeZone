@@ -22,6 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 public class SDCrimeZoneActivity extends Activity implements View.OnClickListener {
 
@@ -132,8 +133,6 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
     spinner.setAdapter(adapter);
   }
 
-
-
   /**
    * Handles all the apps onclick functions
    * 
@@ -141,29 +140,44 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
    */
   public void onClick(View v) {
     if (v.getId() == R.id.submitButton) {
-      JSONArray results = this.sendHttpRequestToServer(v);
-      SDCrimeZoneApplication.debug(this, "got results, switching layout");
-      Intent intent = new Intent();
-      Bundle bun = new Bundle();
+      try {
+        JSONArray results = this.sendHttpRequestToServer(v);
+        SDCrimeZoneApplication.debug(this, "got results, switching layout");
+        Intent intent = new Intent();
+        Bundle bun = new Bundle();
 
-      bun.putString("results", results.toString()); // add two parameters: a string and a boolean
-      EditText addr = (EditText) this.findViewById(R.id.addressText);
-      String currentAddress = addr.getText().toString();
-      double[] latlong = { currLocation.getLatitude(), currLocation.getLongitude() };
-      if (!currentAddress.equals(getString(R.string.defaultLocation))) {
-        latlong = getLatLong(currentAddress);
+        bun.putString("results", results.toString()); // add two parameters: a
+                                                      // string and a boolean
+        EditText addr = (EditText) this.findViewById(R.id.addressText);
+        String currentAddress = addr.getText().toString();
+        double[] latlong = { currLocation.getLatitude(), currLocation.getLongitude() };
+        if (!currentAddress.equals(getString(R.string.defaultLocation))) {
+          latlong = getLatLong(currentAddress);
+        }
+        bun.putString("startLat", String.valueOf(latlong[0]));
+        bun.putString("startLng", String.valueOf(latlong[1]));
+
+        /*
+         * Check if the current address entered is actually in San Diego
+         */
+        if (latlong[0] >= 33.427045 || latlong[1] <= -117.612003 || latlong[0] <= 32.53348900
+            || latlong[1] >= -116.0775811) {
+          Toast notInSD = Toast.makeText(this, "Currently only supporting San Diego locations", 5);
+          notInSD.show();
+        } else {
+
+          intent.setClass(this, SDPopulateCrimeListActivity.class);
+          intent.putExtras(bun);
+          startActivity(intent);
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+        Toast addrNotFound = Toast.makeText(this, "Address Not Found", 5);
+        addrNotFound.show();
       }
-      bun.putString("startLat", String.valueOf(latlong[0]));
-      bun.putString("startLng", String.valueOf(latlong[1]));
-
-      intent.setClass(this, SDPopulateCrimeListActivity.class);
-      intent.putExtras(bun);
-      startActivity(intent);
     }
 
   }
-
-  
 
   /**
    * Sends an HttpRequest to SDCrimeZone-AppEngine with lat, long, radius (and
@@ -189,49 +203,35 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
       }
     }
     return jsonObjs;
-/*
-    EditText addr = (EditText) this.findViewById(R.id.addressText);
-    Spinner dist = (Spinner) this.findViewById(R.id.distanceList);
-    String currentAddress = addr.getText().toString();
-    double[] latlong = { currLocation.getLatitude(), currLocation.getLongitude() };
-    this.debug("curr latlong = " + latlong[0] + ", " + latlong[1]);
-    if (!currentAddress.equals(getString(R.string.defaultLocation))) {
-      this.debug("updating address: " + currentAddress);
-      latlong = getLatLong(currentAddress);
-    }
-    HttpResponse response;
-    try {
-      HttpClient hc = new DefaultHttpClient();
-      HttpGet get = new HttpGet("http://sdcrimezone.appspot.com/crimeZoneServlet?lat=" + latlong[0]
-          + "&lng=" + latlong[1] + "&rad=" + selectedRadius);
-
-      this.debug("HTTPGet = http://sdcrimezone.appspot.com/crimeZoneServlet?lat="
-          + String.valueOf(latlong[0]) + "&lng=" + String.valueOf(latlong[1]) + "&rad="
-          + selectedRadius);
-
-      response = hc.execute(get);
-
-      // get the response from the Google Apps Engine server, should be in JSON
-      // format
-      if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-        Reader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent(),
-            "UTF-8"));
-        StringBuilder builder = new StringBuilder();
-        char[] buf = new char[1000];
-        int l = 0;
-        while (l >= 0) {
-          builder.append(buf, 0, l);
-          l = in.read(buf);
-        }
-        JSONTokener tokener = new JSONTokener(builder.toString());
-        JSONArray finalResult = new JSONArray(tokener);
-        return finalResult;
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return null;
-    */
+    /*
+     * EditText addr = (EditText) this.findViewById(R.id.addressText); Spinner
+     * dist = (Spinner) this.findViewById(R.id.distanceList); String
+     * currentAddress = addr.getText().toString(); double[] latlong = {
+     * currLocation.getLatitude(), currLocation.getLongitude() };
+     * this.debug("curr latlong = " + latlong[0] + ", " + latlong[1]); if
+     * (!currentAddress.equals(getString(R.string.defaultLocation))) {
+     * this.debug("updating address: " + currentAddress); latlong =
+     * getLatLong(currentAddress); } HttpResponse response; try { HttpClient hc
+     * = new DefaultHttpClient(); HttpGet get = new
+     * HttpGet("http://sdcrimezone.appspot.com/crimeZoneServlet?lat=" +
+     * latlong[0] + "&lng=" + latlong[1] + "&rad=" + selectedRadius);
+     * 
+     * this.debug("HTTPGet = http://sdcrimezone.appspot.com/crimeZoneServlet?lat="
+     * + String.valueOf(latlong[0]) + "&lng=" + String.valueOf(latlong[1]) +
+     * "&rad=" + selectedRadius);
+     * 
+     * response = hc.execute(get);
+     * 
+     * // get the response from the Google Apps Engine server, should be in JSON
+     * // format if (response.getStatusLine().getStatusCode() ==
+     * HttpStatus.SC_OK) { Reader in = new BufferedReader(new
+     * InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+     * StringBuilder builder = new StringBuilder(); char[] buf = new char[1000];
+     * int l = 0; while (l >= 0) { builder.append(buf, 0, l); l = in.read(buf);
+     * } JSONTokener tokener = new JSONTokener(builder.toString()); JSONArray
+     * finalResult = new JSONArray(tokener); return finalResult; } } catch
+     * (Exception e) { e.printStackTrace(); } return null;
+     */
   }
 
   private double[] getLatLong(String strAddress) {

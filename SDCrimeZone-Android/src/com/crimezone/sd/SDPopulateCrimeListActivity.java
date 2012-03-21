@@ -125,7 +125,7 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
 
         i.setImageBitmap(bitmap);
         LayoutParams iParams = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
-        iParams.setMargins(5, 15, 5, 15);
+        iParams.setMargins(5, 10, 5, 10);
         i.setLayoutParams(iParams);
         i.setScaleType(ScaleType.FIT_START);
         incidentCol.addView(i);
@@ -140,7 +140,7 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
         numIncidents.setWidth(100);
         numIncidents.setTypeface(Typeface.SANS_SERIF);
         numIncidents.setTextSize(10f);
-        numIncidents.setTextColor(Color.RED);
+        numIncidents.setTextColor(Color.WHITE);
         
         //tr.addView(numIncidents);
         incidentCol.addView(numIncidents);
