@@ -10,8 +10,6 @@
     <string-array name="distanceArray">
         <item>1 mile</item>
         <item>3 mile</item>
-        <item>5 mile</item>
-        <item>10 mile</item>
     </string-array>
     <string-array name="dateArray">
         <item>2011</item>

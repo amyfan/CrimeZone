@@ -40,12 +40,16 @@ public class ShowCrimeMapActivity extends MapActivity {
     }
     String startLat = bun.getString("startLat");
     String startLng = bun.getString("startLng");
+    String radius = bun.getString("radius");
     GeoPoint currLocation = SDCrimeZoneApplication.getGeoPoint(startLat, startLng);
-    
+
     // create a map view
     RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.mapViewLayout);
     mapView = (MapView) findViewById(R.id.mapView);
     mapView.setBuiltInZoomControls(true);
+    mapView.getOverlays().add(
+        new CircleMapOverlay(this, Double.valueOf(startLat).doubleValue(), Double.valueOf(startLng).doubleValue(), 
+            Float.valueOf(radius).floatValue()));
     // Either satellite or 2d
     mapView.setSatellite(false);
     mapController = mapView.getController();
@@ -77,12 +81,12 @@ public class ShowCrimeMapActivity extends MapActivity {
     }
 
   }
-  
+
   public void onPause() {
     super.onPause();
     locationManager.removeUpdates(gps);
   }
-  
+
   public void onDestroy() {
     super.onDestroy();
   }
@@ -93,7 +97,7 @@ public class ShowCrimeMapActivity extends MapActivity {
   }
 
   public class GeoUpdateHandler implements LocationListener {
-    
+
     public GeoUpdateHandler(GeoPoint startingLocation) {
       mapController.animateTo(startingLocation); // mapController.setCenter(point);
     }

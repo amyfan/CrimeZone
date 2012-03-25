@@ -1,6 +1,9 @@
 package com.crimezone.sd;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,6 +60,7 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
       bun.putString("results", getIntent().getExtras().getString("results")); // add two parameters: a string and a boolean
       bun.putString("startLat", getIntent().getExtras().getString("startLat"));
       bun.putString("startLng", getIntent().getExtras().getString("startLng"));
+      bun.putString("radius", getIntent().getExtras().getString("radius"));
       intent.setClass(this, ShowCrimeMapActivity.class);
       intent.putExtras(bun);
       startActivity(intent);
@@ -66,6 +70,7 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
   
   public void populateResultsPage(JSONArray results) throws JSONException {
     setContentView(R.layout.crimes);
+    Double radius =  Double.valueOf(getIntent().getExtras().getString("radius"));
     TableLayout myLayout = (TableLayout) this.findViewById(R.id.crimesLayout);
     HashMap<String, Integer> incidentMap = new HashMap<String, Integer>();
 
@@ -84,30 +89,36 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
           incidentMap.put(bcc, new Integer(newNum));
         }
       }
+      
+      List<String> sortedKeys=new ArrayList(SDCrimeZoneApplication.bccMap.keySet());
+      Collections.sort(sortedKeys);
 
-      for (String bcc : incidentMap.keySet()) {
-        SDCrimeZoneApplication.debug(this, "added " + bcc);
+      for (String bcc : sortedKeys) {
+        //SDCrimeZoneApplication.debug(this, "added " + bcc);
+        // if the bcc code doesn't map to anything, we skip it
         /**
          * Total height per row = 40
          * height of current bar = 10
          */
         /* Create a new row to be added. */
         TableRow tr = new TableRow(this);
-        tr.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+        tr.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
         /* Create the Crime text to be in the row-content. */
         TextView t = new TextView(this);
+        if (!incidentMap.containsKey(bcc)) {
+          incidentMap.put(bcc, Integer.valueOf(0));
+        }
         t.setText(SDCrimeZoneApplication.bccMap.get(bcc)); // get incident type, based on bcc code
-        LayoutParams tParams = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+        LayoutParams tParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1f);
         tParams.setMargins(30, 10, 10, 10);
-        t.setLayoutParams(tParams);
-        t.setHeight(20);
+        t.setSingleLine(false);
         t.setWidth(100);
         t.setTypeface(Typeface.SANS_SERIF);
         t.setTextSize(10f);
         t.setTextColor(Color.WHITE);
 
         /* Add text to row. */
-        tr.addView(t);
+        tr.addView(t, tParams);
         TableLayout incidentLayout = new TableLayout(this);
         TableRow incidentCol = new TableRow(this);
         
@@ -119,21 +130,25 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
         Drawable drawable = res.getDrawable(R.drawable.bar);
         Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
         // crop the image based on how many incidents of that type
-        bitmap = Bitmap.createBitmap(bitmap, 0, 0, 10 * incidentMap.get(bcc).intValue(),
+        int width = 2 * incidentMap.get(bcc).intValue() + 1;
+        // if the width is t
+        if ( width > bitmap.getWidth() - 10) {
+          width = bitmap.getWidth() - 10;
+        }
+        bitmap = Bitmap.createBitmap(bitmap, 0, 0, width,
             bitmap.getHeight());
-        SDCrimeZoneApplication.debug(this, "height= " + bitmap.getHeight());
+       // SDCrimeZoneApplication.debug(this, "height= " + bitmap.getHeight());
 
         i.setImageBitmap(bitmap);
-        LayoutParams iParams = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
-        iParams.setMargins(5, 10, 5, 10);
-        i.setLayoutParams(iParams);
+        LayoutParams iParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        iParams.setMargins(5, 15, 5, 10);
         i.setScaleType(ScaleType.FIT_START);
-        incidentCol.addView(i);
+        incidentCol.addView(i, iParams);
         //tr.addView(i);
         
         TextView numIncidents = new TextView(this);
         numIncidents.setText(incidentMap.get(bcc).toString()); // get number of incidents
-        LayoutParams nParams = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+        LayoutParams nParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         nParams.setMargins(10, 10, 10, 10);
         numIncidents.setLayoutParams(tParams);
         numIncidents.setHeight(20);
@@ -147,8 +162,64 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
         incidentLayout.addView(incidentCol);
         tr.addView(incidentLayout);
         
-        /* Add image to row */
-        myLayout.addView(tr, new TableLayout.LayoutParams(LayoutParams.FILL_PARENT,
+        myLayout.addView(tr, new TableLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+            LayoutParams.WRAP_CONTENT));
+        
+        /**
+         * display averages
+         */
+        
+        /* Create a new row to be added. */
+        TableRow averageRow = new TableRow(this);
+        averageRow.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+        /* Create the Crime text to be in the row-content. */
+        TextView avgTxt = new TextView(this);
+        avgTxt.setText("(SD avg)"); // get incident type, based on bcc code
+        avgTxt.setSingleLine(false);
+        avgTxt.setWidth(100);
+        avgTxt.setTypeface(Typeface.SANS_SERIF);
+        avgTxt.setTextSize(10f);
+        avgTxt.setTextColor(Color.GRAY);
+
+        /* Add text to row. */
+        averageRow.addView(avgTxt, tParams);
+        TableLayout avgIncidentLayout = new TableLayout(this);
+        TableRow avgIncidentCol = new TableRow(this);
+        
+        /* Create the bar image to be added */
+        ImageView avgImg = new ImageView(this);
+
+        // get the bar .png image
+        Drawable drawableAvg = res.getDrawable(R.drawable.bar);
+        Bitmap bitmapAvg = ((BitmapDrawable) drawableAvg).getBitmap();
+        // crop the image based on how many incidents of that type
+        double average = SDCrimeZoneApplication.bccAverage2011.get(bcc).doubleValue() * radius.doubleValue();
+        double  widthAvg = 2.0 * average + 1;
+        // if the width is t
+        if ( widthAvg > bitmapAvg.getWidth() - 10) {
+          widthAvg = bitmapAvg.getWidth() - 10;
+        }
+        bitmapAvg = Bitmap.createBitmap(bitmapAvg, 0, 0, (int)widthAvg,
+            bitmapAvg.getHeight());
+
+        avgImg.setImageBitmap(bitmapAvg);
+        avgIncidentCol.addView(avgImg, iParams);
+        
+        TextView numAvg = new TextView(this);
+        numAvg.setText(String.valueOf(average)); // get number of incidents
+        numAvg.setLayoutParams(tParams);
+        numAvg.setHeight(20);
+        numAvg.setWidth(100);
+        numAvg.setTypeface(Typeface.SANS_SERIF);
+        numAvg.setTextSize(10f);
+        numAvg.setTextColor(Color.GRAY);
+        
+        //tr.addView(numIncidents);
+        avgIncidentCol.addView(numAvg);
+        avgIncidentLayout.addView(avgIncidentCol);
+        averageRow.addView(avgIncidentLayout);
+        
+        myLayout.addView(averageRow, new TableLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT));
       }
     }

@@ -162,6 +162,7 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
         }
         bun.putString("startLat", String.valueOf(latlong[0]));
         bun.putString("startLng", String.valueOf(latlong[1]));
+        bun.putString("radius", selectedRadius);
 
         /*
          * Check if the current address entered is actually in San Diego
@@ -199,21 +200,27 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
     EditText addr = (EditText) this.findViewById(R.id.addressText);
     Spinner dist = (Spinner) this.findViewById(R.id.distanceList);
     String currentAddress = addr.getText().toString();
+    try {
     double[] latlong = { currLocation.getLatitude(), currLocation.getLongitude() };
+   
     if (!currentAddress.equals(getString(R.string.defaultLocation))) {
       latlong = getLatLong(currentAddress);
     }
     HttpResponse response;
-    try {
       HttpClient hc = new DefaultHttpClient();
-      HttpGet get = new HttpGet("http://sdcrimezone.appspot.com/crimeZoneServlet?lat=" + latlong[0]
+//      SDCrimeZoneApplication.debug( this,
+//          "http://127.0.0.1:8888/SDCrimeZone_AppEngine.html?gwt.codesvr=127.0.0.1:9997/crimeZoneServlet?lat=" + latlong[0]
+//              + "&lng=" + latlong[1] + "&rad=" + selectedRadius + "&year=" + selectedDate);
+      HttpGet get = new HttpGet("http://sdcrimezone2.appspot.com/crimeZoneServlet?lat=" + latlong[0]
           + "&lng=" + latlong[1] + "&rad=" + selectedRadius + "&year=" + selectedDate);
+//      HttpGet get = new HttpGet("http://127.0.0.1:8888/SDCrimeZone_AppEngine.html?gwt.codesvr=127.0.0.1:9997/crimeZoneServlet?lat=" + latlong[0]
+//          + "&lng=" + latlong[1] + "&rad=" + selectedRadius + "&year=" + selectedDate);
 
       SDCrimeZoneApplication.debug( this,
           "HTTPGet = http://sdcrimezone.appspot.com/crimeZoneServlet?lat="
               + String.valueOf(latlong[0]) + "&lng=" + String.valueOf(latlong[1]) + "&rad="
               + selectedRadius + "&year=" + selectedDate);
-
+      
       response = hc.execute(get);
 
       // get the response from the Google Apps Engine server, should be in JSON
