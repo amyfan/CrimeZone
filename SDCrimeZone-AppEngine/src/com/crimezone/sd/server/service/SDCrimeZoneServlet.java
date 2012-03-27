@@ -54,7 +54,7 @@ public class SDCrimeZoneServlet extends HttpServlet {
         url = "http://sdcrimezone.appspot.com/resources/complete.txt";
       loadIncidentFile(url);
       // TODO: precomputed incident set call here:
-      loadIncidentSetFile(url, IncidentSetTypeEnum.ONE_MILE_ALL_YEAR);
+      // loadIncidentSetFile(url, IncidentSetTypeEnum.ONE_MILE_ALL_YEAR);
     }
 
     try {
