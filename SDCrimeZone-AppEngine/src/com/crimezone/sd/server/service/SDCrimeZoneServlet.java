@@ -82,7 +82,7 @@ public class SDCrimeZoneServlet extends HttpServlet {
 
         if (setTypeString != null && !setTypeString.isEmpty()) {
           List<IncidentsOneMile> objects = null;
-          if (IncidentSetTypeEnum.ONE_MILE_ALL_YEAR.equals(setTypeString)) {
+          if (IncidentSetTypeEnum.ONE_MILE_ALL_YEAR.toString().equals(setTypeString)) {
             try {
               LocationCapableRepositorySearch<IncidentsOneMile> searchImpl = new JPALocationCapableRepositorySearchImpl<IncidentsOneMile>(
                   baseQuery, pm, IncidentsOneMile.class);
