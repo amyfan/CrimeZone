@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import com.crimezone.sd.server.domain.AverageIncidentNumber;
 import com.crimezone.sd.server.domain.Incident;
+import com.crimezone.sd.server.domain.IncidentsOneMile;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Query;
 
@@ -71,10 +72,22 @@ public class CrimeDataStore {
     return q.list();
   }
 
+  public List<IncidentsOneMile> findAllIncidentsByOneMile(Double latitute, Double longitude) {
+    // TODO: this query is wrong, implement location query data here
+    Query<IncidentsOneMile> q = dao.getObjectify().query(IncidentsOneMile.class);
+    return q.list();
+  }
+
   public Incident updateIncident(Incident incident) {
     dao.getObjectify().put(incident); // id populated in this statement
     System.out.println("Updated Incident to datastore: " + incident.toString());
     return incident;
+  }
+
+  public IncidentsOneMile updateIncidentsOneMile(IncidentsOneMile incidents) {
+    dao.getObjectify().put(incidents); // id populated in this statement
+    System.out.println("Updated Incident to datastore: " + incidents.toString());
+    return incidents;
   }
 
   public void deleteIncident(Long id) {
@@ -82,12 +95,14 @@ public class CrimeDataStore {
     dao.getObjectify().delete(Incident.class, id);
   }
 
-  /**
-   * TODO: verify that this works
-   */
   public void deleteAllIncidents() {
     System.out.println("Deleting all Incidents from datastore: ");
     dao.getObjectify().delete(dao.getObjectify().query(Incident.class).fetchKeys());
+  }
+
+  public void deleteAllIncidentsOneMiles() {
+    System.out.println("Deleting all IncidentsOneMiles from datastore: ");
+    dao.getObjectify().delete(dao.getObjectify().query(IncidentsOneMile.class).fetchKeys());
   }
 
   /**

@@ -21,6 +21,9 @@ import com.beoui.geocell.LocationCapableRepositorySearch;
 import com.beoui.geocell.model.GeocellQuery;
 import com.beoui.geocell.model.Point;
 import com.crimezone.sd.server.domain.Incident;
+import com.crimezone.sd.server.domain.IncidentSet;
+import com.crimezone.sd.server.domain.IncidentSetTypeEnum;
+import com.crimezone.sd.server.domain.IncidentsOneMile;
 import com.crimezone.sd.server.logic.CrimeDataLoader;
 import com.crimezone.sd.server.logic.CrimeDataReader;
 import com.crimezone.sd.server.logic.JSONUtils;
@@ -37,6 +40,7 @@ public class SDCrimeZoneServlet extends HttpServlet {
     String lonString = checkNull(req.getParameter("lng"));
     String radString = checkNull(req.getParameter("rad"));
     String yearString = checkNull(req.getParameter("year"));
+    String setTypeString = checkNull(req.getParameter("setType"));
     String action = checkNull(req.getParameter("action"));
 
     // TODO: temp
@@ -48,9 +52,10 @@ public class SDCrimeZoneServlet extends HttpServlet {
         url = String.format("http://%s:8888/resources/input1.txt", serverName);
       else
         url = "http://sdcrimezone.appspot.com/resources/complete.txt";
-      LoadFile(url);
+      loadIncidentFile(url);
+      // TODO: precomputed incident set call here:
+      loadIncidentSetFile(url, IncidentSetTypeEnum.ONE_MILE_ALL_YEAR);
     }
-    //
 
     try {
       if (!latString.isEmpty() && !lonString.isEmpty() && !radString.isEmpty()) {
@@ -62,30 +67,57 @@ public class SDCrimeZoneServlet extends HttpServlet {
 
         if (!yearString.isEmpty()) {
           Integer year = Integer.valueOf(yearString);
-          dataReader.findIncidentsByYearAndRadius(year, latitude, longitude, radius);
+          // TODO: not being used
+          // dataReader.findIncidentsByYearAndRadius(year, latitude, longitude,
+          // radius);
         }
 
         // Transform it to a point
-        Point p = new Point((double)latitude, (double)longitude);
+        Point p = new Point((double) latitude, (double) longitude);
 
         PersistenceManager pm = PMF.get().getPersistenceManager();
         List<Object> params = new ArrayList<Object>();
         GeocellQuery baseQuery = new GeocellQuery("", "", params);
+        JSONArray jsonArray = null;
 
-        List<Incident> objects = null;
-        try {
-          LocationCapableRepositorySearch<Incident> searchImpl = new JPALocationCapableRepositorySearchImpl<Incident>(baseQuery, pm, Incident.class);
-          objects = GeocellManager.proximityFetch(p, 1000, radius.intValue()*1609, searchImpl );
-            //objects = GeocellManager.proximitySearch(p, 40, 0, Incident.class, baseQuery, pm);
-        } catch (Exception e) {
-          e.printStackTrace();
-            // We catch exception here because we have not configured the PersistentManager (and so the queries won't work)
+        if (setTypeString != null && !setTypeString.isEmpty()) {
+          List<IncidentsOneMile> objects = null;
+          if (IncidentSetTypeEnum.ONE_MILE_ALL_YEAR.equals(setTypeString)) {
+            try {
+              LocationCapableRepositorySearch<IncidentsOneMile> searchImpl = new JPALocationCapableRepositorySearchImpl<IncidentsOneMile>(
+                  baseQuery, pm, IncidentsOneMile.class);
+              objects = GeocellManager
+                  .proximityFetch(p, 1000, radius.intValue() * 1609, searchImpl);
+              // objects = GeocellManager.proximitySearch(p, 40, 0,
+              // IncidentsOneMile.class,
+              // baseQuery, pm);
+            } catch (Exception e) {
+              e.printStackTrace();
+              // We catch exception here because we have not configured the
+              // PersistentManager (and so the queries won't work)
+            }
+          }
+          jsonArray = JSONUtils
+              .convertIncidentSetToJSONArray((List<IncidentSet>) (List<?>) objects);
+        } else {
+          List<Incident> objects = null;
+          try {
+            LocationCapableRepositorySearch<Incident> searchImpl = new JPALocationCapableRepositorySearchImpl<Incident>(
+                baseQuery, pm, Incident.class);
+            objects = GeocellManager.proximityFetch(p, 1000, radius.intValue() * 1609, searchImpl);
+            // objects = GeocellManager.proximitySearch(p, 40, 0,
+            // Incident.class,
+            // baseQuery, pm);
+          } catch (Exception e) {
+            e.printStackTrace();
+            // We catch exception here because we have not configured the
+            // PersistentManager (and so the queries won't work)
+          }
+          jsonArray = JSONUtils.convertIncidentsToJSONArray(objects);
         }
-        
-        
-        JSONArray jsonArray = JSONUtils.convertIncidentsToJSONArray(objects);
-        if (jsonArray != null)
+        if (jsonArray != null) {
           resp.getWriter().println(jsonArray.toString());
+        }
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -105,12 +137,12 @@ public class SDCrimeZoneServlet extends HttpServlet {
         url = String.format("http://%s:8888/resources/complete.txt", serverName);
       else
         url = "http://sdcrimezone.appspot.com/resources/complete.txt";
-      LoadFile(url);
+      loadIncidentFile(url);
     }
 
   }
 
-  private void LoadFile(String url) {
+  private void loadIncidentFile(String url) {
     try {
       URL inputData = new URL(url);
       URLConnection urlConn = inputData.openConnection();
@@ -120,6 +152,22 @@ public class SDCrimeZoneServlet extends HttpServlet {
       dataLoader.deleteAllIncidents();
       dataLoader.insertIncidents(in);
     } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+    }
+  }
+
+  private void loadIncidentSetFile(String url, IncidentSetTypeEnum setType) {
+    try {
+      URL inputData = new URL(url);
+      URLConnection urlConn = inputData.openConnection();
+      InputStreamReader is = new InputStreamReader(urlConn.getInputStream(), "UTF8");
+      BufferedReader in = new BufferedReader(is);
+      CrimeDataLoader dataLoader = CrimeDataLoader.getInstance();
+      dataLoader.deleteAllIncidentSets(setType);
+      dataLoader.insertIncidentSet(in, setType);
+    } catch (Exception e) {
+      e.printStackTrace();
     } finally {
     }
   }

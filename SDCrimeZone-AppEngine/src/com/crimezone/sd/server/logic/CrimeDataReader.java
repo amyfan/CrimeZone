@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import com.crimezone.sd.server.domain.AverageIncidentNumber;
 import com.crimezone.sd.server.domain.Incident;
+import com.crimezone.sd.server.domain.IncidentsOneMile;
 import com.crimezone.sd.server.persistence.CrimeDataStore;
 
 /**
@@ -66,6 +67,11 @@ public class CrimeDataReader {
       Double longitude, Integer radius) {
     List<Incident> incidents = crimeDao.findIncidentsByYearAndRadius(year, latitude, longitude,
         radius);
+    return incidents;
+  }
+
+  public List<IncidentsOneMile> findAllIncidentsByOneMile(Double latitude, Double longitude) {
+    List<IncidentsOneMile> incidents = crimeDao.findAllIncidentsByOneMile(latitude, longitude);
     return incidents;
   }
 
