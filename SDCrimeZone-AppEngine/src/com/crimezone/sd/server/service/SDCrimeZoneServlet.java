@@ -49,12 +49,12 @@ public class SDCrimeZoneServlet extends HttpServlet {
       String url;
       if (serverName.compareToIgnoreCase("127.0.0.1") == 0
           || serverName.compareToIgnoreCase("localhost") == 0)
-        url = String.format("http://%s:8888/resources/input1.txt", serverName);
+        url = String.format("http://%s:8888/resources/cached_2011.txt", serverName);
       else
         url = "http://sdcrimezone.appspot.com/resources/complete.txt";
-      loadIncidentFile(url);
+      //loadIncidentFile(url);
       // TODO: precomputed incident set call here:
-      // loadIncidentSetFile(url, IncidentSetTypeEnum.ONE_MILE_ALL_YEAR);
+      loadIncidentSetFile(url, IncidentSetTypeEnum.ONE_MILE_ALL_YEAR);
     }
 
     try {
@@ -64,60 +64,70 @@ public class SDCrimeZoneServlet extends HttpServlet {
         Integer radius = Integer.valueOf(radString);
         Double latitude = Double.valueOf(latString);
         Double longitude = Double.valueOf(lonString);
-
+        Integer year;
         if (!yearString.isEmpty()) {
-          Integer year = Integer.valueOf(yearString);
+          year = Integer.valueOf(yearString);
           // TODO: not being used
           // dataReader.findIncidentsByYearAndRadius(year, latitude, longitude,
           // radius);
         }
+        
+        IncidentsOneMile cachedResult = dataReader.findIncidentsByCloseLatitudeLongitude(latitude,longitude,radius);
 
-        // Transform it to a point
-        Point p = new Point((double) latitude, (double) longitude);
-
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        List<Object> params = new ArrayList<Object>();
-        GeocellQuery baseQuery = new GeocellQuery("", "", params);
-        JSONArray jsonArray = null;
-
-        if (setTypeString != null && !setTypeString.isEmpty()) {
-          List<IncidentsOneMile> objects = null;
-          if (IncidentSetTypeEnum.ONE_MILE_ALL_YEAR.toString().equals(setTypeString)) {
-            try {
-              LocationCapableRepositorySearch<IncidentsOneMile> searchImpl = new JPALocationCapableRepositorySearchImpl<IncidentsOneMile>(
-                  baseQuery, pm, IncidentsOneMile.class);
-              objects = GeocellManager
-                  .proximityFetch(p, 1000, radius.intValue() * 1609, searchImpl);
-              // objects = GeocellManager.proximitySearch(p, 40, 0,
-              // IncidentsOneMile.class,
-              // baseQuery, pm);
-            } catch (Exception e) {
-              e.printStackTrace();
-              // We catch exception here because we have not configured the
-              // PersistentManager (and so the queries won't work)
-            }
-          }
-          jsonArray = JSONUtils
-              .convertIncidentSetToJSONArray((List<IncidentSet>) (List<?>) objects);
+        if (cachedResult != null) {
+        	resp.getWriter().println(cachedResult.getResult());
         } else {
-          List<Incident> objects = null;
-          try {
-            LocationCapableRepositorySearch<Incident> searchImpl = new JPALocationCapableRepositorySearchImpl<Incident>(
-                baseQuery, pm, Incident.class);
-            objects = GeocellManager.proximityFetch(p, 1000, radius.intValue() * 1609, searchImpl);
-            // objects = GeocellManager.proximitySearch(p, 40, 0,
-            // Incident.class,
-            // baseQuery, pm);
-          } catch (Exception e) {
-            e.printStackTrace();
-            // We catch exception here because we have not configured the
-            // PersistentManager (and so the queries won't work)
-          }
-          jsonArray = JSONUtils.convertIncidentsToJSONArray(objects);
+        	resp.getWriter().println("[]");
         }
-        if (jsonArray != null) {
-          resp.getWriter().println(jsonArray.toString());
-        }
+//        // Transform it to a point
+//        Point p = new Point((double) latitude, (double) longitude);
+//
+//        //PersistenceManager pm = PMF.get().getPersistenceManager();
+//        List<Object> params = new ArrayList<Object>();
+//        //GeocellQuery baseQuery = new GeocellQuery("", "", params);
+//        JSONArray jsonArray = null;
+//
+//        if (setTypeString != null && !setTypeString.isEmpty()) {
+//          List<IncidentsOneMile> objects = null;
+//          if (IncidentSetTypeEnum.ONE_MILE_ALL_YEAR.toString().equals(setTypeString)) {
+//            try {
+//            	//TODO: need a new search based on nearest, lat/long
+//            	/*
+//              LocationCapableRepositorySearch<IncidentsOneMile> searchImpl = new JPALocationCapableRepositorySearchImpl<IncidentsOneMile>(
+//                  baseQuery, pm, IncidentsOneMile.class);
+//              objects = GeocellManager
+//                  .proximityFetch(p, 1000, radius.intValue() * 1609, searchImpl);
+//                  */
+//              // objects = GeocellManager.proximitySearch(p, 40, 0,
+//              // IncidentsOneMile.class,
+//              // baseQuery, pm);
+//            } catch (Exception e) {
+//              e.printStackTrace();
+//              // We catch exception here because we have not configured the
+//              // PersistentManager (and so the queries won't work)
+//            }
+//          }
+//          jsonArray = JSONUtils
+//              .convertIncidentSetToJSONArray((List<IncidentSet>) (List<?>) objects);
+//        } else {
+//          List<Incident> objects = null;
+//          try {
+//            LocationCapableRepositorySearch<Incident> searchImpl = new JPALocationCapableRepositorySearchImpl<Incident>(
+//                baseQuery, pm, Incident.class);
+//            objects = GeocellManager.proximityFetch(p, 1000, radius.intValue() * 1609, searchImpl);
+//            // objects = GeocellManager.proximitySearch(p, 40, 0,
+//            // Incident.class,
+//            // baseQuery, pm);
+//          } catch (Exception e) {
+//            e.printStackTrace();
+//            // We catch exception here because we have not configured the
+//            // PersistentManager (and so the queries won't work)
+//          }
+//          jsonArray = JSONUtils.convertIncidentsToJSONArray(objects);
+//        }
+//        if (jsonArray != null) {
+//          resp.getWriter().println(jsonArray.toString());
+//        }
       }
     } catch (Exception e) {
       e.printStackTrace();

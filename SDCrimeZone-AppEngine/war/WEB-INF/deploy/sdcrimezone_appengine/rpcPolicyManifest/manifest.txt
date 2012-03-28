@@ -1,2 +1,3 @@
 # Module sdcrimezone_appengine
 # RPC service class, partial path of RPC policy file
+com.crimezone.sd.client.GreetingService, 2ECB8C110C621F48AB2BC6C5D1CD96C1.gwt.rpc

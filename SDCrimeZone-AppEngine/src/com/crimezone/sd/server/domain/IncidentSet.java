@@ -1,8 +1,5 @@
 package com.crimezone.sd.server.domain;
 
-import java.util.List;
-
-import com.beoui.geocell.model.Point;
 import com.google.appengine.api.datastore.Text;
 
 public interface IncidentSet {
@@ -11,23 +8,21 @@ public interface IncidentSet {
 
   public void setId(Long id);
 
-  public Double getLatitude();
+  public String getLatitude();
 
-  public void setLatitude(Double latitude);
+  public void setLatitude(String latitude);
 
-  public Double getLongitude();
+  public String getLongitude();
 
-  public void setLongitude(Double longitude);
+  public void setLongitude(String longitude);
 
   public Text getIncidentSet();
 
   public void setIncidentSet(Text incidentSet);
 
-  public void setGeocells(List<String> geocells);
-
-  public List<String> getGeocells();
-
-  public Point getLocation();
-
   public String getKeyString();
+
+  public void setResult(String result);
+  
+  public String getResult();
 }

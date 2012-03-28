@@ -1,5 +1,6 @@
 package com.crimezone.sd.server.persistence;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
@@ -72,9 +73,11 @@ public class CrimeDataStore {
     return q.list();
   }
 
-  public List<IncidentsOneMile> findAllIncidentsByOneMile(Double latitute, Double longitude) {
+  public List<IncidentsOneMile> findAllIncidentsByOneMile(String lat, String lng) {
+	  
     // TODO: this query is wrong, implement location query data here
-    Query<IncidentsOneMile> q = dao.getObjectify().query(IncidentsOneMile.class);
+	System.out.println(lat + "," + lng);
+    Query<IncidentsOneMile> q = dao.getObjectify().query(IncidentsOneMile.class).filter("latitude", lat).filter("longitude", lng);
     return q.list();
   }
 

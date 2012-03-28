@@ -34,6 +34,7 @@ public class CrimeDataLoader {
   private static final int INCIDENTS_LATITUDE_INDEX = 0;
   private static final int INCIDENTS_LONGITUDE_INDEX = 1;
   private static final int INCIDENTS_SET_INDEX = 2;
+  private static final int INCIDENTS_RESULT_INDEX = 2;
   private static final String DATE_FORMAT = "M/d/yyyy HH:mm";
 
   private static final Logger log = Logger.getLogger(CrimeDataReader.class.getName());
@@ -118,16 +119,15 @@ public class CrimeDataLoader {
           default:
             incidents = new IncidentsOneMile();
           }
-          String[] fields = line.split(",");
+          String[] fields = line.split(";");
 
-          Double latitude = new Double(fields[INCIDENTS_LATITUDE_INDEX]);
-          Double longitude = new Double(fields[INCIDENTS_LONGITUDE_INDEX]);
+          String latitude = String.format("%.3f", new Double(fields[INCIDENTS_LATITUDE_INDEX]));
+          String longitude = String.format("%.3f", new Double(fields[INCIDENTS_LONGITUDE_INDEX]));
+          String result = new String(fields[INCIDENTS_RESULT_INDEX]);
           incidents.setLatitude(latitude);
           incidents.setLongitude(longitude);
 
-          List<String> cells = GeocellManager.generateGeoCell(new Point(latitude.doubleValue(),
-              longitude.doubleValue()));
-          incidents.setGeocells(cells);
+          incidents.setResult(result);
 
           incidents.setIncidentSet(new Text(fields[INCIDENTS_SET_INDEX]));
 
