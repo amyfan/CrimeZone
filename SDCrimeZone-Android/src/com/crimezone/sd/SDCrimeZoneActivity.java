@@ -1,8 +1,13 @@
 package com.crimezone.sd;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
-import java.io.Reader;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -12,6 +17,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONTokener;
+
+import com.google.gson.Gson;
 
 import android.app.Activity;
 import android.content.Context;
@@ -147,27 +154,33 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
   public void onClick(View v) {
     if (v.getId() == R.id.submitButton) {
       try {
-        JSONArray results = this.sendHttpRequestToServer(v);
+        String results = this.sendHttpRequestToServer(v);
         SDCrimeZoneApplication.debug(this, "got results, switching layout");
         Intent intent = new Intent();
         Bundle bun = new Bundle();
 
-        bun.putString("results", results.toString()); // add two parameters: a
+        bun.putString("results", results); // add two parameters: a
                                                       // string and a boolean
         EditText addr = (EditText) this.findViewById(R.id.addressText);
         String currentAddress = addr.getText().toString();
-        double[] latlong = { currLocation.getLatitude(), currLocation.getLongitude() };
-        if (!currentAddress.equals(getString(R.string.defaultLocation))) {
-          latlong = getLatLong(currentAddress);
+        double[] latlong = {32.5, -117};
+        if (currLocation != null) {
+          latlong[0] = currLocation.getLatitude();
+          latlong[1] = currLocation.getLongitude();
+          if (!currentAddress.equals(getString(R.string.defaultLocation))) {
+            latlong = getLatLong(currentAddress);
+          }
         }
+        
         bun.putString("startLat", String.valueOf(latlong[0]));
         bun.putString("startLng", String.valueOf(latlong[1]));
+        
         bun.putString("radius", selectedRadius);
 
         /*
          * Check if the current address entered is actually in San Diego
          */
-        if (latlong[0] >= 33.427045 || latlong[1] <= -117.612003 || latlong[0] <= 32.53348900
+        if (latlong[0] >= 33.427045 || latlong[1] <= -117.612003 || latlong[0] <= 32
             || latlong[1] >= -116.0775811) {
           Toast notInSD = Toast.makeText(this, "Currently only supporting San Diego locations", 5);
           notInSD.show();
@@ -192,7 +205,7 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
    * page.
    * 
    **/
-  private JSONArray sendHttpRequestToServer(View v) {
+  private String sendHttpRequestToServer(View v) {
     // get the current GPS coordinates, distance, and dates selected
 
     JSONArray jsonObjs = new JSONArray();
@@ -201,43 +214,66 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
     Spinner dist = (Spinner) this.findViewById(R.id.distanceList);
     String currentAddress = addr.getText().toString();
     try {
-    double[] latlong = { currLocation.getLatitude(), currLocation.getLongitude() };
-   
-    if (!currentAddress.equals(getString(R.string.defaultLocation))) {
-      latlong = getLatLong(currentAddress);
-    }
-    HttpResponse response;
+      
+      double[] latlong = {32.5, -117};
+      /*
+      if (currLocation != null) {
+        latlong[0] = currLocation.getLatitude();
+        latlong[1] = currLocation.getLongitude();
+      }
+      if (!currentAddress.equals(getString(R.string.defaultLocation))) {
+        latlong = getLatLong(currentAddress);
+      }*/
+      HttpResponse response;
       HttpClient hc = new DefaultHttpClient();
-//      SDCrimeZoneApplication.debug( this,
-//          "http://127.0.0.1:8888/SDCrimeZone_AppEngine.html?gwt.codesvr=127.0.0.1:9997/crimeZoneServlet?lat=" + latlong[0]
-//              + "&lng=" + latlong[1] + "&rad=" + selectedRadius + "&year=" + selectedDate);
-      HttpGet get = new HttpGet("http://sdcrimezone2.appspot.com/crimeZoneServlet?lat=" + latlong[0]
-          + "&lng=" + latlong[1] + "&rad=" + selectedRadius + "&year=" + selectedDate);
-//      HttpGet get = new HttpGet("http://127.0.0.1:8888/SDCrimeZone_AppEngine.html?gwt.codesvr=127.0.0.1:9997/crimeZoneServlet?lat=" + latlong[0]
-//          + "&lng=" + latlong[1] + "&rad=" + selectedRadius + "&year=" + selectedDate);
-
-      SDCrimeZoneApplication.debug( this,
+      // SDCrimeZoneApplication.debug( this,
+      // "http://127.0.0.1:8888/SDCrimeZone_AppEngine.html?gwt.codesvr=127.0.0.1:9997/crimeZoneServlet?lat="
+      // + latlong[0]
+      // + "&lng=" + latlong[1] + "&rad=" + selectedRadius + "&year=" +
+      // selectedDate);
+      latlong[0] = 32.5;
+      latlong[1] = -117;
+      SDCrimeZoneApplication.debug(
+          this,
           "HTTPGet = http://sdcrimezone.appspot.com/crimeZoneServlet?lat="
               + String.valueOf(latlong[0]) + "&lng=" + String.valueOf(latlong[1]) + "&rad="
               + selectedRadius + "&year=" + selectedDate);
-      
-      response = hc.execute(get);
+      HttpGet get = new HttpGet("http://sdcrimezone.appspot.com/crimeZoneServlet?lat="
+          + String.valueOf(latlong[0]) + "&lng=" + String.valueOf(latlong[1]) + "&rad=" + selectedRadius + "&year=" + selectedDate);
+      // HttpGet get = new
+      // HttpGet("http://127.0.0.1:8888/SDCrimeZone_AppEngine.html?gwt.codesvr=127.0.0.1:9997/crimeZoneServlet?lat="
+      // + latlong[0]
+      // + "&lng=" + latlong[1] + "&rad=" + selectedRadius + "&year=" +
+      // selectedDate);
 
+      
+
+      response = hc.execute(get);
+      
       // get the response from the Google Apps Engine server, should be in JSON
       // format
       if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-        Reader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent(),
-            "UTF-8"));
-        StringBuilder builder = new StringBuilder();
-        char[] buf = new char[1000];
-        int l = 0;
-        while (l >= 0) {
-          builder.append(buf, 0, l);
-          l = in.read(buf);
+        File responseFile = File.createTempFile("results", "json", this.getFilesDir()); 
+        //Buffers
+        BufferedReader bufReader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+        BufferedWriter bufWriter = new BufferedWriter(new FileWriter(responseFile));
+        int nbCharRead = 0; int i=0; int totalRead = 0;
+        char[] buffer = new char[10000];
+
+        while((nbCharRead = bufReader.read(buffer, 0, 10000)) != -1)
+        {
+            totalRead += nbCharRead;
+            //System.out.println("buffer = " + String.valueOf(buffer));
+            bufWriter.write(buffer, 0, nbCharRead );
+        }       
+
+        if(bufWriter != null)
+        {
+            bufWriter.flush();
+            bufWriter.close();
         }
-        JSONTokener tokener = new JSONTokener(builder.toString());
-        JSONArray finalResult = new JSONArray(tokener);
-        return finalResult;
+        
+        return responseFile.getPath();
       }
     } catch (Exception e) {
       e.printStackTrace();

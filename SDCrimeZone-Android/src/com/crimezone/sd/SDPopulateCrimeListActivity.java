@@ -1,15 +1,20 @@
 package com.crimezone.sd;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -18,7 +23,9 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.Display;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
@@ -27,19 +34,86 @@ import android.widget.TableRow;
 import android.widget.TableRow.LayoutParams;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+
 public class SDPopulateCrimeListActivity extends Activity implements View.OnClickListener {
   
+  private List<Data> myResults;
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     
-    JSONArray results = null;
+    String results = null;
     Bundle bundle = getIntent().getExtras();
+    Double startLng = Double.valueOf(getIntent().getExtras().getString("startLng"));
+    Double startLat = Double.valueOf(getIntent().getExtras().getString("startLat"));
+    Double startRad = Double.valueOf(getIntent().getExtras().getString("radius")) * Double.valueOf(0.01449);
+     
     try {
-      results = new JSONArray(bundle.getString("results"));
-      this.populateResultsPage(results);
+      results = bundle.getString("results");
+      FileInputStream fstream = new FileInputStream(results);
+      
+      DataInputStream in = new DataInputStream(fstream);
+      
+      BufferedReader br = new BufferedReader(new InputStreamReader(in));
+      String strLine;
+      //Read File Line By Line
+      String text = "";
+      char chrBuffer[] = new char[1];
+      myResults = new ArrayList<Data>();
+      String checkDigit = "-0123456789.";
+      boolean checkedDigit = false;
+      boolean gotYear = false;
+      while (br.read(chrBuffer) >= 0) //loop through each line
+      {
+        char curr = chrBuffer[0];
+        if (curr == '{') {
+          text = "{";
+        } else {
+          if (gotYear && !checkedDigit && checkDigit.indexOf(curr) >= 0) {
+            text += '"';
+            checkedDigit = true;
+          }
+          if (gotYear && checkedDigit && checkDigit.indexOf(curr) < 0) {
+            text += '"';
+          }
+          if (gotYear && checkedDigit && curr == '"') {
+            text += ',';
+            checkedDigit = false;
+          }
+          text += curr;
+          if (gotYear && checkedDigit && curr == ',') {
+            checkedDigit = false;
+          }
+          if (!gotYear && text.lastIndexOf("year") > 0) {
+              gotYear = true;
+          }
+        }
+        if (curr == '}') {
+          System.out.println(text);
+          Data currData = new Gson().fromJson(text, Data.class);
+          if (Math.abs(Double.valueOf(currData.getLat()) - startLat + Double.valueOf(currData.getLng()) - startLng) <= startRad) {
+            myResults.add(currData);
+          }
+          br.read(chrBuffer);
+          checkedDigit = false;
+          gotYear = false;
+        }
+      }
+      in.close();//Close the input stream
+      this.populateResultsPage(myResults);
     } catch (JSONException e) {
+      e.printStackTrace();
+    } catch (FileNotFoundException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (JsonSyntaxException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     Button viewMapButton = (Button) this.findViewById(R.id.viewMapButton);
@@ -56,6 +130,7 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
       SDCrimeZoneApplication.debug(this, "opening map");
       Intent intent = new Intent();
       Bundle bun = new Bundle();
+     
 
       bun.putString("results", getIntent().getExtras().getString("results")); // add two parameters: a string and a boolean
       bun.putString("startLat", getIntent().getExtras().getString("startLat"));
@@ -68,7 +143,7 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
 
   }
   
-  public void populateResultsPage(JSONArray results) throws JSONException {
+  public void populateResultsPage(List<Data> results) throws JSONException {
     setContentView(R.layout.crimes);
     Double radius =  Double.valueOf(getIntent().getExtras().getString("radius"));
     TableLayout myLayout = (TableLayout) this.findViewById(R.id.crimesLayout);
@@ -78,9 +153,9 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
       // TODO: display an elegent error message, if no results found
       // return user to main
     } else {
-      for (int i = 0; i < results.length(); i++) {
-        JSONObject obj = results.getJSONObject(i);
-        String bcc = (String) obj.get("bcc");
+      for (int i = 0; i < results.size(); i++) {
+        Data obj = results.get(i);
+        String bcc = obj.getBcc();
         if (!incidentMap.containsKey(bcc)) {
           incidentMap.put(bcc, Integer.valueOf(1));
         } else {
@@ -109,6 +184,7 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
           incidentMap.put(bcc, Integer.valueOf(0));
         }
         t.setText(SDCrimeZoneApplication.bccMap.get(bcc)); // get incident type, based on bcc code
+        System.out.println("bcc text = " + SDCrimeZoneApplication.bccMap.get(bcc));
         LayoutParams tParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1f);
         tParams.setMargins(30, 10, 10, 10);
         t.setSingleLine(false);
@@ -132,8 +208,9 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
         // crop the image based on how many incidents of that type
         int width = 2 * incidentMap.get(bcc).intValue() + 1;
         // if the width is t
-        if ( width > bitmap.getWidth() - 10) {
-          width = bitmap.getWidth() - 10;
+        Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay(); 
+        if ( width > display.getWidth() - 300) {
+          width = display.getWidth() - 300;
         }
         bitmap = Bitmap.createBitmap(bitmap, 0, 0, width,
             bitmap.getHeight());
@@ -169,58 +246,58 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
          * display averages
          */
         
-        /* Create a new row to be added. */
-        TableRow averageRow = new TableRow(this);
-        averageRow.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-        /* Create the Crime text to be in the row-content. */
-        TextView avgTxt = new TextView(this);
-        avgTxt.setText("(SD avg)"); // get incident type, based on bcc code
-        avgTxt.setSingleLine(false);
-        avgTxt.setWidth(100);
-        avgTxt.setTypeface(Typeface.SANS_SERIF);
-        avgTxt.setTextSize(10f);
-        avgTxt.setTextColor(Color.GRAY);
-
-        /* Add text to row. */
-        averageRow.addView(avgTxt, tParams);
-        TableLayout avgIncidentLayout = new TableLayout(this);
-        TableRow avgIncidentCol = new TableRow(this);
-        
-        /* Create the bar image to be added */
-        ImageView avgImg = new ImageView(this);
-
-        // get the bar .png image
-        Drawable drawableAvg = res.getDrawable(R.drawable.bar);
-        Bitmap bitmapAvg = ((BitmapDrawable) drawableAvg).getBitmap();
-        // crop the image based on how many incidents of that type
-        double average = SDCrimeZoneApplication.bccAverage2011.get(bcc).doubleValue() * radius.doubleValue();
-        double  widthAvg = 2.0 * average + 1;
-        // if the width is t
-        if ( widthAvg > bitmapAvg.getWidth() - 10) {
-          widthAvg = bitmapAvg.getWidth() - 10;
-        }
-        bitmapAvg = Bitmap.createBitmap(bitmapAvg, 0, 0, (int)widthAvg,
-            bitmapAvg.getHeight());
-
-        avgImg.setImageBitmap(bitmapAvg);
-        avgIncidentCol.addView(avgImg, iParams);
-        
-        TextView numAvg = new TextView(this);
-        numAvg.setText(String.valueOf(average)); // get number of incidents
-        numAvg.setLayoutParams(tParams);
-        numAvg.setHeight(20);
-        numAvg.setWidth(100);
-        numAvg.setTypeface(Typeface.SANS_SERIF);
-        numAvg.setTextSize(10f);
-        numAvg.setTextColor(Color.GRAY);
-        
-        //tr.addView(numIncidents);
-        avgIncidentCol.addView(numAvg);
-        avgIncidentLayout.addView(avgIncidentCol);
-        averageRow.addView(avgIncidentLayout);
-        
-        myLayout.addView(averageRow, new TableLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
-            LayoutParams.WRAP_CONTENT));
+//        /* Create a new row to be added. */
+//        TableRow averageRow = new TableRow(this);
+//        averageRow.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+//        /* Create the Crime text to be in the row-content. */
+//        TextView avgTxt = new TextView(this);
+//        avgTxt.setText("(SD avg)"); // get incident type, based on bcc code
+//        avgTxt.setSingleLine(false);
+//        avgTxt.setWidth(100);
+//        avgTxt.setTypeface(Typeface.SANS_SERIF);
+//        avgTxt.setTextSize(10f);
+//        avgTxt.setTextColor(Color.GRAY);
+//
+//        /* Add text to row. */
+//        averageRow.addView(avgTxt, tParams);
+//        TableLayout avgIncidentLayout = new TableLayout(this);
+//        TableRow avgIncidentCol = new TableRow(this);
+//        
+//        /* Create the bar image to be added */
+//        ImageView avgImg = new ImageView(this);
+//
+//        // get the bar .png image
+//        Drawable drawableAvg = res.getDrawable(R.drawable.bar);
+//        Bitmap bitmapAvg = ((BitmapDrawable) drawableAvg).getBitmap();
+//        // crop the image based on how many incidents of that type
+//        double average = SDCrimeZoneApplication.bccAverage2011.get(bcc).doubleValue() * radius.doubleValue();
+//        double  widthAvg = 2.0 * average + 1;
+//        // if the width is t
+//        if ( widthAvg > bitmapAvg.getWidth() - 10) {
+//          widthAvg = bitmapAvg.getWidth() - 10;
+//        }
+//        bitmapAvg = Bitmap.createBitmap(bitmapAvg, 0, 0, (int)widthAvg,
+//            bitmapAvg.getHeight());
+//
+//        avgImg.setImageBitmap(bitmapAvg);
+//        avgIncidentCol.addView(avgImg, iParams);
+//        
+//        TextView numAvg = new TextView(this);
+//        numAvg.setText(String.valueOf(average)); // get number of incidents
+//        numAvg.setLayoutParams(tParams);
+//        numAvg.setHeight(20);
+//        numAvg.setWidth(100);
+//        numAvg.setTypeface(Typeface.SANS_SERIF);
+//        numAvg.setTextSize(10f);
+//        numAvg.setTextColor(Color.GRAY);
+//        
+//        //tr.addView(numIncidents);
+//        avgIncidentCol.addView(numAvg);
+//        avgIncidentLayout.addView(avgIncidentCol);
+//        averageRow.addView(avgIncidentLayout);
+//        
+//        myLayout.addView(averageRow, new TableLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+//            LayoutParams.WRAP_CONTENT));
       }
     }
 
