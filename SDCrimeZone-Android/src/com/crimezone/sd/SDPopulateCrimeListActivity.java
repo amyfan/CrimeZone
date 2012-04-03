@@ -11,7 +11,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Context;
@@ -49,7 +51,7 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
     Bundle bundle = getIntent().getExtras();
     Double startLng = Double.valueOf(getIntent().getExtras().getString("startLng"));
     Double startLat = Double.valueOf(getIntent().getExtras().getString("startLat"));
-    Double startRad = Double.valueOf(getIntent().getExtras().getString("radius")) * Double.valueOf(0.01449);
+    Double startRad = Double.valueOf(getIntent().getExtras().getString("radius"));
      
     try {
       results = bundle.getString("results");
@@ -94,7 +96,11 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
         if (curr == '}') {
           System.out.println(text);
           Data currData = new Gson().fromJson(text, Data.class);
-          if (Math.abs(Double.valueOf(currData.getLat()) - startLat + Double.valueOf(currData.getLng()) - startLng) <= startRad) {
+          Double numMilesLat = Math.abs(69.11 * (Double.valueOf(currData.getLat()) - startLat));
+          Double numMilesLng = Math.abs(69.11 * Math.cos(Double.valueOf(currData.getLat())* 0.0174532925) * (Double.valueOf(currData.getLng()) - startLng));
+          Double dist = Math.sqrt(numMilesLat*numMilesLat + numMilesLng*numMilesLng);
+          System.out.println("rad = " + dist);
+          if (dist <= startRad) {
             myResults.add(currData);
           }
           br.read(chrBuffer);
@@ -130,9 +136,19 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
       SDCrimeZoneApplication.debug(this, "opening map");
       Intent intent = new Intent();
       Bundle bun = new Bundle();
+      
+      JSONArray jsonArr = new JSONArray();
+      for (Data res : myResults) {
+        try {
+          JSONObject jsonObj = new JSONObject(new Gson().toJson(res));
+          jsonArr.put(jsonObj);
+        } catch (JSONException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+      }
      
-
-      bun.putString("results", getIntent().getExtras().getString("results")); // add two parameters: a string and a boolean
+      bun.putString("results", jsonArr.toString()); // add two parameters: a string and a boolean
       bun.putString("startLat", getIntent().getExtras().getString("startLat"));
       bun.putString("startLng", getIntent().getExtras().getString("startLng"));
       bun.putString("radius", getIntent().getExtras().getString("radius"));
@@ -211,6 +227,9 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
         Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay(); 
         if ( width > display.getWidth() - 300) {
           width = display.getWidth() - 300;
+        }
+        if (width > bitmap.getWidth() - 30) {
+          width = bitmap.getWidth() - 30;
         }
         bitmap = Bitmap.createBitmap(bitmap, 0, 0, width,
             bitmap.getHeight());

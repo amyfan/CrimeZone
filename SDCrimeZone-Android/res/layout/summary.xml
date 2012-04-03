@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/crimesSummaryScrollView"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" >
+
+    <RelativeLayout
+        android:id="@+id/crimesSummaryLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical" >
+
+        <RelativeLayout
+            android:id="@+id/goodSummaryLayout"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:id="@+id/goodResultsImage"
+                android:layout_width="150px"
+                android:layout_height="300px"
+                android:src="@drawable/good" />
+
+            <LinearLayout
+                android:id="@+id/goodResultsList"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/goodResultsImage"
+                android:orientation="vertical" >
+            </LinearLayout>
+        </RelativeLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="4dip"
+            android:layout_below="@id/goodSummaryLayout"
+            android:layout_centerVertical="true"
+            android:background="#ffffff" />
+
+        <RelativeLayout
+            android:id="@+id/badSummaryLayout"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_below="@id/goodSummaryLayout"
+            android:layout_marginTop="30px"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:id="@+id/badResultsImage"
+                android:layout_width="150px"
+                android:layout_height="300px"
+                android:src="@drawable/bad" />
+
+            <LinearLayout
+                android:id="@+id/badResultsList"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/badResultsImage"
+                android:orientation="vertical" >
+            </LinearLayout>
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/viewCrimesListButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/badSummaryLayout"
+            android:layout_marginTop="30px"
+            android:text="See Details" />
+    </RelativeLayout>
+
+</ScrollView>

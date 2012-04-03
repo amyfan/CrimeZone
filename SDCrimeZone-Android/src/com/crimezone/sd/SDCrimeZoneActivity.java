@@ -155,7 +155,6 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
     if (v.getId() == R.id.submitButton) {
       try {
         String results = this.sendHttpRequestToServer(v);
-        SDCrimeZoneApplication.debug(this, "got results, switching layout");
         Intent intent = new Intent();
         Bundle bun = new Bundle();
 
@@ -163,7 +162,7 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
                                                       // string and a boolean
         EditText addr = (EditText) this.findViewById(R.id.addressText);
         String currentAddress = addr.getText().toString();
-        double[] latlong = {32.5, -117};
+        double[] latlong = {0, 0};
         if (currLocation != null) {
           latlong[0] = currLocation.getLatitude();
           latlong[1] = currLocation.getLongitude();
@@ -174,22 +173,23 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
         
         bun.putString("startLat", String.valueOf(latlong[0]));
         bun.putString("startLng", String.valueOf(latlong[1]));
-        
+        bun.putString("year", selectedDate);
         bun.putString("radius", selectedRadius);
 
         /*
          * Check if the current address entered is actually in San Diego
          */
+        /*
         if (latlong[0] >= 33.427045 || latlong[1] <= -117.612003 || latlong[0] <= 32
             || latlong[1] >= -116.0775811) {
           Toast notInSD = Toast.makeText(this, "Currently only supporting San Diego locations", 5);
           notInSD.show();
         } else {
-
-          intent.setClass(this, SDPopulateCrimeListActivity.class);
+        */
+          intent.setClass(this, SDCrimeSummaryActivity.class);
           intent.putExtras(bun);
           startActivity(intent);
-        }
+        //}
       } catch (Exception e) {
         e.printStackTrace();
         Toast addrNotFound = Toast.makeText(this, "Address Not Found", 5);
@@ -215,15 +215,15 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
     String currentAddress = addr.getText().toString();
     try {
       
-      double[] latlong = {32.5, -117};
-      /*
+      double[] latlong = {0, 0};
+      
       if (currLocation != null) {
         latlong[0] = currLocation.getLatitude();
         latlong[1] = currLocation.getLongitude();
       }
       if (!currentAddress.equals(getString(R.string.defaultLocation))) {
         latlong = getLatLong(currentAddress);
-      }*/
+      }
       HttpResponse response;
       HttpClient hc = new DefaultHttpClient();
       // SDCrimeZoneApplication.debug( this,
@@ -231,8 +231,6 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
       // + latlong[0]
       // + "&lng=" + latlong[1] + "&rad=" + selectedRadius + "&year=" +
       // selectedDate);
-      latlong[0] = 32.5;
-      latlong[1] = -117;
       SDCrimeZoneApplication.debug(
           this,
           "HTTPGet = http://sdcrimezone.appspot.com/crimeZoneServlet?lat="
