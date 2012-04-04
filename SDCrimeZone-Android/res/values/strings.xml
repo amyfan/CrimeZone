@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">SDCrimeZone</string>
+    <string name="app_name">San Diego Crime Stats</string>
     <string name="currLocation">Address</string>
     <string name="defaultLocation">Current Location</string>
     <string name="distance">Distance</string>

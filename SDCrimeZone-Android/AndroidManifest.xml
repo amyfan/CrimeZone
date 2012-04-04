@@ -12,7 +12,7 @@
 
     <application
         android:debuggable="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/icon_launcher"
         android:label="@string/app_name" >
         <uses-library android:name="com.google.android.maps" />
         <activity
@@ -29,6 +29,8 @@
         <activity android:name=".SDCrimeMapActivity" >
         </activity>
         <activity android:name=".ShowCrimeMapActivity" >
+        </activity>
+        <activity android:name=".SDCrimeSummaryActivity" >
         </activity>
     </application>
 

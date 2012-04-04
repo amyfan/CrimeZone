@@ -4,6 +4,11 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="30dp">
+    </View>
+    
     <TextView
         android:id="@+id/currentLocationText"
         android:layout_width="wrap_content"
@@ -17,6 +22,11 @@
         android:layout_marginLeft="20px" >
         <requestFocus />
     </EditText>
+    
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="20dp">
+    </View>
 
     <TextView
         android:id="@+id/distanceText"
@@ -29,6 +39,11 @@
         android:layout_width="400px"
         android:layout_height="wrap_content" 
         android:layout_marginLeft="20px"/>
+    
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="20dp">
+    </View>
     
      <TextView
         android:id="@+id/dateBackToText"
