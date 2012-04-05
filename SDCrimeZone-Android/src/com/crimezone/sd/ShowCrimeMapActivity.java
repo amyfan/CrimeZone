@@ -59,7 +59,7 @@ public class ShowCrimeMapActivity extends MapActivity {
     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, gps);
 
     Drawable drawable = this.getResources().getDrawable(R.drawable.point);
-    itemizedoverlay = new CrimeMapOverlay(drawable);
+    itemizedoverlay = new CrimeMapOverlay(drawable, this);
     // create current location marker
     // createMarker();
     for (int i = 0; i < results.length(); i++) {
@@ -68,17 +68,21 @@ public class ShowCrimeMapActivity extends MapActivity {
         obj = results.getJSONObject(i);
         String lng = obj.get("lng").toString();
         String lat = obj.get("lat").toString();
-        SDCrimeZoneApplication.debug(this, "mapping " + lat + ", " + lng);
+        //SDCrimeZoneApplication.debug(this, "mapping " + lat + ", " + lng);
         Double myLat = new Double(lat);
         Double myLng = new Double(lng);
+        String crime = SDCrimeZoneApplication.bccMap.get(obj.get("bcc").toString());
+        String address = obj.get("address").toString();
         int iLat = (int) (myLat.doubleValue() * 1E6);
         int iLng = (int) (myLng.doubleValue() * 1E6);
-        createMarker(iLat, iLng);
+        // create the marker for Maps view
+        createMarker(iLat, iLng, crime, address);
       } catch (JSONException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
     }
+    mapView.getOverlays().add(itemizedoverlay);
 
   }
 
@@ -115,12 +119,12 @@ public class ShowCrimeMapActivity extends MapActivity {
     }
   }
 
-  private void createMarker(int lat, int lng) {
+  private void createMarker(int lat, int lng, String title, String subtext) {
 
     GeoPoint p = new GeoPoint(lat, lng);
 
-    OverlayItem overlayitem = new OverlayItem(p, "", "");
+    OverlayItem overlayitem = new OverlayItem(p, title, subtext);
     itemizedoverlay.addOverlay(overlayitem);
-    mapView.getOverlays().add(itemizedoverlay);
+    
   }
 }

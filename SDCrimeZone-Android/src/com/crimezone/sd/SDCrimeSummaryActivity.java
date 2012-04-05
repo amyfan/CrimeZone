@@ -105,8 +105,8 @@ public class SDCrimeSummaryActivity extends Activity implements View.OnClickList
     } catch (Exception e) {
       e.printStackTrace();
     }
-    Button viewMapButton = (Button) this.findViewById(R.id.viewCrimesListButton);
-    viewMapButton.setOnClickListener(this);
+    Button viewCrimesDetailedListButton = (Button) this.findViewById(R.id.viewCrimesListButton);
+    viewCrimesDetailedListButton.setOnClickListener(this);
   }
   
   /**
@@ -130,7 +130,7 @@ public class SDCrimeSummaryActivity extends Activity implements View.OnClickList
         }
       }
      
-      bun.putString("results", jsonArr.toString()); // add two parameters: a string and a boolean
+      bun.putString("results", jsonArr.toString()); 
       bun.putString("startLat", getIntent().getExtras().getString("startLat"));
       bun.putString("startLng", getIntent().getExtras().getString("startLng"));
       bun.putString("radius", getIntent().getExtras().getString("radius"));

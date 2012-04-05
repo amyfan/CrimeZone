@@ -1,68 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/crimesMainScrollView"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:layout_height="wrap_content" >
 
-    <View
+    <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="30dp">
-    </View>
-    
-    <TextView
-        android:id="@+id/currentLocationText"
-        android:layout_width="wrap_content"
-        android:layout_height="20dp"
-        android:text="@string/currLocation" />
-
-    <EditText
-        android:id="@+id/addressText"
-        android:layout_width="fill_parent"
-        android:layout_height="50dp"
-        android:layout_marginLeft="20px" >
-        <requestFocus />
-    </EditText>
-    
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="20dp">
-    </View>
+        android:layout_height="fill_parent"
+        android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/distanceText"
-        android:layout_width="wrap_content"
-        android:layout_height="20dp"
-        android:text="@string/distance" />
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="30dp" >
+        </View>
 
-    <Spinner
-        android:id="@+id/distanceList"
-        android:layout_width="400px"
-        android:layout_height="wrap_content" 
-        android:layout_marginLeft="20px"/>
-    
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="20dp">
-    </View>
-    
-     <TextView
-        android:id="@+id/dateBackToText"
-        android:layout_width="wrap_content"
-        android:layout_height="20dp"
-        android:text="@string/dateBackTo" />
-     
-     <Spinner
-        android:id="@+id/datesList"
-        android:layout_width="400px"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20px" />
+        <TextView
+            android:id="@+id/currentLocationText"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:text="@string/currLocation" />
 
-    <Button
-        android:id="@+id/submitButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20px"
-        android:layout_marginTop="20px"
-        android:text="Submit" />
-    
-</LinearLayout>
+        <EditText
+            android:id="@+id/addressText"
+            android:layout_width="fill_parent"
+            android:layout_height="50dp"
+            android:layout_marginLeft="20px" >
+
+            <requestFocus />
+        </EditText>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="20dp" >
+        </View>
+
+        <TextView
+            android:id="@+id/distanceText"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:text="@string/distance" />
+
+        <Spinner
+            android:id="@+id/distanceList"
+            android:layout_width="400px"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20px" />
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="20dp" >
+        </View>
+
+        <TextView
+            android:id="@+id/dateBackToText"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:text="@string/dateBackTo" />
+
+        <Spinner
+            android:id="@+id/datesList"
+            android:layout_width="400px"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20px" />
+
+        <Button
+            android:id="@+id/submitButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20px"
+            android:layout_marginTop="20px"
+            android:text="Submit" />
+    </LinearLayout>
+
+</ScrollView>

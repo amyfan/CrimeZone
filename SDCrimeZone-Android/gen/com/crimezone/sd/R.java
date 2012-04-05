@@ -22,27 +22,28 @@ public final class R {
         public static final int point=0x7f020004;
     }
     public static final class id {
-        public static final int addressText=0x7f060005;
-        public static final int badResultsImage=0x7f060013;
-        public static final int badResultsList=0x7f060014;
-        public static final int badSummaryLayout=0x7f060012;
+        public static final int addressText=0x7f060006;
+        public static final int badResultsImage=0x7f060014;
+        public static final int badResultsList=0x7f060015;
+        public static final int badSummaryLayout=0x7f060013;
         public static final int crimesLayout=0x7f060002;
         public static final int crimesLayoutMaps=0x7f060001;
         public static final int crimesListScrollView=0x7f060000;
-        public static final int crimesSummaryLayout=0x7f06000e;
-        public static final int crimesSummaryScrollView=0x7f06000d;
-        public static final int currentLocationText=0x7f060004;
-        public static final int dateBackToText=0x7f060008;
-        public static final int datesList=0x7f060009;
-        public static final int distanceList=0x7f060007;
-        public static final int distanceText=0x7f060006;
-        public static final int goodResultsImage=0x7f060010;
-        public static final int goodResultsList=0x7f060011;
-        public static final int goodSummaryLayout=0x7f06000f;
-        public static final int mapView=0x7f06000c;
-        public static final int mapViewLayout=0x7f06000b;
-        public static final int submitButton=0x7f06000a;
-        public static final int viewCrimesListButton=0x7f060015;
+        public static final int crimesMainScrollView=0x7f060004;
+        public static final int crimesSummaryLayout=0x7f06000f;
+        public static final int crimesSummaryScrollView=0x7f06000e;
+        public static final int currentLocationText=0x7f060005;
+        public static final int dateBackToText=0x7f060009;
+        public static final int datesList=0x7f06000a;
+        public static final int distanceList=0x7f060008;
+        public static final int distanceText=0x7f060007;
+        public static final int goodResultsImage=0x7f060011;
+        public static final int goodResultsList=0x7f060012;
+        public static final int goodSummaryLayout=0x7f060010;
+        public static final int mapView=0x7f06000d;
+        public static final int mapViewLayout=0x7f06000c;
+        public static final int submitButton=0x7f06000b;
+        public static final int viewCrimesListButton=0x7f060016;
         public static final int viewMapButton=0x7f060003;
     }
     public static final class layout {
