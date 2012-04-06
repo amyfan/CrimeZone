@@ -42,7 +42,7 @@ public class CircleMapOverlay extends Overlay {
 
     projection.toPixels(geo, pt);
 
-    float circleRadius = metersToRadius(radius * 1600, mapView, mLat);
+    float circleRadius = metersToRadius(radius * 1650, mapView, mLat);
 
     Paint innerCirclePaint;
 
