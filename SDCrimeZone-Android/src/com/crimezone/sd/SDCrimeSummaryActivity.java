@@ -91,8 +91,8 @@ public class SDCrimeSummaryActivity extends Activity implements View.OnClickList
           Double numMilesLng = Math.abs(69.11 * Math.cos(Double.valueOf(currData.getLat())* 0.0174532925) * (Double.valueOf(currData.getLng()) - startLng));
           Double dist = Math.sqrt(numMilesLat*numMilesLat + numMilesLng*numMilesLng);
           if (dist <= startRad) {
-            System.out.println("adding: " + currData.getLat() + ", " + currData.getLng());
-            myResults.add(currData);
+              System.out.println("adding: " + currData.getLat() + ", " + currData.getLng());
+              myResults.add(currData);
           }
           br.read(chrBuffer);
           checkedDigit = false;
@@ -187,15 +187,22 @@ public class SDCrimeSummaryActivity extends Activity implements View.OnClickList
         t.setSingleLine(false);
         t.setTypeface(Typeface.SANS_SERIF);
         t.setTextSize(10f);
+        
+        String crimeName = "";
+        if ("AMSZ".indexOf(bcc, 0) >= 0 ) {
+          crimeName = SDCrimeZoneApplication.bccMap.get(bcc);
+        } else {
+          crimeName = SDCrimeZoneApplication.bccMap.get(bcc) + " crimes";
+        }
        
         // if less than 10% of this type of crime, than show under good results
-        if (percentage < 10.0) {
+        if (percentage < 5.0) {
           n.setTextColor(Color.GREEN);
           if (incidentMap.get(bcc) == null || incidentMap.get(bcc).doubleValue() == 0.0) {
-            n.setText("No " + SDCrimeZoneApplication.bccMap.get(bcc) );
+            n.setText("No " + crimeName );
             t.setText(" within " + radius + " mile(s) radius in " + year + ".");
           } else {
-            n.setText(String.format("Only %.2f",percentage) + "% of " + SDCrimeZoneApplication.bccMap.get(bcc) + " crimes");
+            n.setText(String.format("Only %.2f",percentage) + "% of " + crimeName);
             n.setTextSize(12f);
           }
           
@@ -205,7 +212,7 @@ public class SDCrimeSummaryActivity extends Activity implements View.OnClickList
           }
         } else {
           n.setTextColor(Color.RED);
-          n.setText(String.format("%.2f",percentage) + "% of " + SDCrimeZoneApplication.bccMap.get(bcc) + " crimes");
+          n.setText(String.format("%.2f",percentage) + "% of " + crimeName);
           n.setTextSize(12f);
           if (!String.valueOf(percentage).equals("NaN")) {
             badLayout.addView(n, tParams);

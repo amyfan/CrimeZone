@@ -47,6 +47,7 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    System.out.println("SDCrimeZoneActivity: OnCreate");
     this.createLocationManager();
     this.initializeApp();
   }
@@ -118,7 +119,7 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
     // Register the listener with the Location Manager to receive location
     // updates
     locationManager
-        .requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+        .requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
   }
 
   public void updateAddressWithCurrentLocation(Location location) {
