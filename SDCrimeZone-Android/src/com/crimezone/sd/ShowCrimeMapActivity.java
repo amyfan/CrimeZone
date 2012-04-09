@@ -66,7 +66,7 @@ public class ShowCrimeMapActivity extends MapActivity {
     // Either satellite or 2d
     mapView.setSatellite(false);
     mapController = mapView.getController();
-    mapController.setZoom(14); // Zoon 1 is world view
+    mapController.setZoom(15); // Zoon 1 is world view
     locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     gps = new GeoUpdateHandler(currLocation);
     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, gps);
@@ -74,13 +74,10 @@ public class ShowCrimeMapActivity extends MapActivity {
     Drawable drawable = this.getResources().getDrawable(R.drawable.point);
 
     violentCrimeOverlay = new CrimeMapOverlay(drawable, this);
-    // mapView.getOverlays().add(violentCrimeOverlay);
 
     propertyCrimeOverlay = new CrimeMapOverlay(drawable, this);
-    // mapView.getOverlays().add(propertyCrimeOverlay);
 
     otherCrimeOverlay = new CrimeMapOverlay(drawable, this);
-    // mapView.getOverlays().add(otherCrimeOverlay);
 
     populateCrimeOverlays(results);
 
@@ -107,6 +104,10 @@ public class ShowCrimeMapActivity extends MapActivity {
         toggleOtherOverlay();
       }
     });
+    
+    toggleOtherOverlay();
+    togglePropertyOverlay();
+    toggleViolentOverlay();
   }
 
   public void onPause() {
@@ -140,6 +141,8 @@ public class ShowCrimeMapActivity extends MapActivity {
 
     public void onStatusChanged(String provider, int status, Bundle extras) {
     }
+    
+    
   }
 
   private void populateCrimeOverlays(JSONArray results) {
