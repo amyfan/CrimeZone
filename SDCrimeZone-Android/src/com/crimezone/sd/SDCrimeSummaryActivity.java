@@ -1,12 +1,5 @@
 package com.crimezone.sd;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,18 +20,13 @@ import android.widget.LinearLayout;
 import android.widget.TableRow.LayoutParams;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-
 public class SDCrimeSummaryActivity extends Activity implements View.OnClickListener {
   
-  private List<Data> myResults;
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     
-    String results = null;
     Bundle bundle = getIntent().getExtras();
     Double startLng = Double.valueOf(getIntent().getExtras().getString("startLng"));
     Double startLat = Double.valueOf(getIntent().getExtras().getString("startLat"));
@@ -46,62 +34,8 @@ public class SDCrimeSummaryActivity extends Activity implements View.OnClickList
     String year = getIntent().getExtras().getString("year");
      
     try {
-      results = bundle.getString("results");
-      FileInputStream fstream = new FileInputStream(results);
-      
-      DataInputStream in = new DataInputStream(fstream);
-      
-      BufferedReader br = new BufferedReader(new InputStreamReader(in));
-      String strLine;
-      //Read File Line By Line
-      String text = "";
-      char chrBuffer[] = new char[1];
-      myResults = new ArrayList<Data>();
-      String checkDigit = "-0123456789.";
-      boolean checkedDigit = false;
-      boolean gotYear = false;
-      while (br.read(chrBuffer) >= 0) //loop through each line
-      {
-        char curr = chrBuffer[0];
-        if (curr == '{') {
-          text = "{";
-        } else {
-          if (gotYear && !checkedDigit && checkDigit.indexOf(curr) >= 0) {
-            text += '"';
-            checkedDigit = true;
-          }
-          if (gotYear && checkedDigit && checkDigit.indexOf(curr) < 0) {
-            text += '"';
-          }
-          if (gotYear && checkedDigit && curr == '"') {
-            text += ',';
-            checkedDigit = false;
-          }
-          text += curr;
-          if (gotYear && checkedDigit && curr == ',') {
-            checkedDigit = false;
-          }
-          if (!gotYear && text.lastIndexOf("year") > 0) {
-              gotYear = true;
-          }
-        }
-        if (curr == '}') {
-          Data currData = new Gson().fromJson(text, Data.class);
-          Double numMilesLat = Math.abs(69.11 * (Double.valueOf(currData.getLat()) - startLat));
-          Double numMilesLng = Math.abs(69.11 * Math.cos(Double.valueOf(currData.getLat())* 0.0174532925) * (Double.valueOf(currData.getLng()) - startLng));
-          Double dist = Math.sqrt(numMilesLat*numMilesLat + numMilesLng*numMilesLng);
-          if (dist <= startRad) {
-              System.out.println("adding: " + currData.getLat() + ", " + currData.getLng());
-              myResults.add(currData);
-          }
-          br.read(chrBuffer);
-          checkedDigit = false;
-          gotYear = false;
-        }
-      }
-      in.close();//Close the input stream
-      System.out.println("My Results total = " + myResults.size());
-      this.populateResultsPage(myResults);
+      JSONArray results = new JSONArray(bundle.getString("results"));
+      this.populateSummaryPage(results);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -118,19 +52,8 @@ public class SDCrimeSummaryActivity extends Activity implements View.OnClickList
     if (v.getId() == R.id.viewCrimesListButton) {
       Intent intent = new Intent();
       Bundle bun = new Bundle();
-      
-      JSONArray jsonArr = new JSONArray();
-      for (Data res : myResults) {
-        try {
-          JSONObject jsonObj = new JSONObject(new Gson().toJson(res));
-          jsonArr.put(jsonObj);
-        } catch (JSONException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        }
-      }
      
-      bun.putString("results", jsonArr.toString()); 
+      bun.putString("results", getIntent().getExtras().getString("results")); 
       bun.putString("startLat", getIntent().getExtras().getString("startLat"));
       bun.putString("startLng", getIntent().getExtras().getString("startLng"));
       bun.putString("radius", getIntent().getExtras().getString("radius"));
@@ -142,21 +65,24 @@ public class SDCrimeSummaryActivity extends Activity implements View.OnClickList
 
   }
   
-  public void populateResultsPage(List<Data> results) throws JSONException {
+  public void populateSummaryPage(JSONArray results) throws JSONException {
     setContentView(R.layout.summary);
     Double radius =  Double.valueOf(getIntent().getExtras().getString("radius"));
     String year =  getIntent().getExtras().getString("year");
     LinearLayout goodLayout = (LinearLayout) this.findViewById(R.id.goodResultsList);
     LinearLayout badLayout = (LinearLayout) this.findViewById(R.id.badResultsList);
     HashMap<String, Integer> incidentMap = new HashMap<String, Integer>();
+    
+    LayoutParams tParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1f);
+    tParams.setMargins(10, 2, 10, 2);
 
     if (results == null) {
       // TODO: display an elegent error message, if no results found
       // return user to main
     } else {
-      for (int i = 0; i < results.size(); i++) {
-        Data obj = results.get(i);
-        String bcc = obj.getBcc();
+      for (int i = 0; i < results.length(); i++) {
+        JSONObject obj = results.getJSONObject(i);
+        String bcc = (String) obj.get("bcc");
         if (!incidentMap.containsKey(bcc)) {
           incidentMap.put(bcc, Integer.valueOf(1));
         } else {
@@ -168,6 +94,9 @@ public class SDCrimeSummaryActivity extends Activity implements View.OnClickList
       
       List<String> sortedKeys=new ArrayList(SDCrimeZoneApplication.bccMap.keySet());
       Collections.sort(sortedKeys);
+      
+      int countBadIncidents = 0;
+      List<String> goodIncidents = new ArrayList<String>();
 
       for (String bcc : sortedKeys) {
         /* Create a new row to be added. */
@@ -182,8 +111,8 @@ public class SDCrimeSummaryActivity extends Activity implements View.OnClickList
 
         percentage = 100.00 - (Math.abs((total.doubleValue()- incidentMap.get(bcc).doubleValue() )/(total.doubleValue())) * 100);
         t.setText(" for San Diego occured within a " + radius + " mile(s) radius."); // get incident type, based on bcc code
-        LayoutParams tParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 1f);
-        tParams.setMargins(10, 2, 10, 2);
+        
+        
         t.setSingleLine(false);
         t.setTypeface(Typeface.SANS_SERIF);
         t.setTextSize(10f);
@@ -195,21 +124,22 @@ public class SDCrimeSummaryActivity extends Activity implements View.OnClickList
           crimeName = SDCrimeZoneApplication.bccMap.get(bcc) + " crimes";
         }
        
-        // if less than 10% of this type of crime, than show under good results
-        if (percentage < 5.0) {
-          n.setTextColor(Color.GREEN);
-          if (incidentMap.get(bcc) == null || incidentMap.get(bcc).doubleValue() == 0.0) {
-            n.setText("No " + crimeName );
-            t.setText(" within " + radius + " mile(s) radius in " + year + ".");
-          } else {
-            n.setText(String.format("Only %.2f",percentage) + "% of " + crimeName);
-            n.setTextSize(12f);
-          }
-          
-          if (!String.valueOf(percentage).equals("NaN")) {
-            goodLayout.addView(n, tParams);
-            goodLayout.addView(t, tParams);
-          }
+        // if less than 3% of this type of crime, than show under good results
+        if (percentage < 3.0) {
+            n.setTextColor(Color.GREEN);
+            if (incidentMap.get(bcc) == null || incidentMap.get(bcc).doubleValue() == 0.0) {
+              goodIncidents.add(bcc);
+            } else {
+              n.setText(String.format("Only %.2f",percentage) + "% of " + crimeName);
+              n.setTextSize(12f);
+            }
+            
+            if (!String.valueOf(percentage).equals("NaN")) {
+              if (incidentMap.get(bcc) != null && incidentMap.get(bcc).doubleValue() != 0.0) {
+                goodLayout.addView(n, tParams);
+                goodLayout.addView(t, tParams);
+              }
+            }
         } else {
           n.setTextColor(Color.RED);
           n.setText(String.format("%.2f",percentage) + "% of " + crimeName);
@@ -217,9 +147,35 @@ public class SDCrimeSummaryActivity extends Activity implements View.OnClickList
           if (!String.valueOf(percentage).equals("NaN")) {
             badLayout.addView(n, tParams);
             badLayout.addView(t, tParams);
+            countBadIncidents++;
           }
         }
      
+      }
+      if (goodIncidents.size() > 0) {
+        TextView n = new TextView(this);
+        TextView t = new TextView(this);
+        n.setTextColor(Color.GREEN);
+        String crimeName = "";
+        for (int i = 0; i < goodIncidents.size(); i++) {
+          crimeName += SDCrimeZoneApplication.bccMap.get(goodIncidents.get(i));
+          if (i < goodIncidents.size()-1) {
+            crimeName += ", ";
+          }
+        }
+        n.setText("No reports of " + crimeName );
+        t.setText(" within " + radius + " mile(s) radius in " + year + ".");
+        t.setTypeface(Typeface.SANS_SERIF);
+        t.setTextSize(10f);
+        goodLayout.addView(n, tParams);
+        goodLayout.addView(t, tParams);
+      }
+      if (countBadIncidents == 0) {
+        TextView n = new TextView(this);
+        n.setTextColor(Color.RED);
+        n.setText("No bad stuff.");
+        n.setTextSize(12f);
+        badLayout.addView(n, tParams);
       }
     }
 

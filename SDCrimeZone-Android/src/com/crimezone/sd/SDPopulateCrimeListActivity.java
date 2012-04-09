@@ -1,11 +1,5 @@
 package com.crimezone.sd;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,9 +29,6 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TableRow.LayoutParams;
 import android.widget.TextView;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 
 public class SDPopulateCrimeListActivity extends Activity implements View.OnClickListener {
   
@@ -186,62 +177,7 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
         myLayout.addView(tr, new TableLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT));
         
-        /**
-         * display averages
-         */
-        
-//        /* Create a new row to be added. */
-//        TableRow averageRow = new TableRow(this);
-//        averageRow.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-//        /* Create the Crime text to be in the row-content. */
-//        TextView avgTxt = new TextView(this);
-//        avgTxt.setText("(SD avg)"); // get incident type, based on bcc code
-//        avgTxt.setSingleLine(false);
-//        avgTxt.setWidth(100);
-//        avgTxt.setTypeface(Typeface.SANS_SERIF);
-//        avgTxt.setTextSize(10f);
-//        avgTxt.setTextColor(Color.GRAY);
-//
-//        /* Add text to row. */
-//        averageRow.addView(avgTxt, tParams);
-//        TableLayout avgIncidentLayout = new TableLayout(this);
-//        TableRow avgIncidentCol = new TableRow(this);
-//        
-//        /* Create the bar image to be added */
-//        ImageView avgImg = new ImageView(this);
-//
-//        // get the bar .png image
-//        Drawable drawableAvg = res.getDrawable(R.drawable.bar);
-//        Bitmap bitmapAvg = ((BitmapDrawable) drawableAvg).getBitmap();
-//        // crop the image based on how many incidents of that type
-//        double average = SDCrimeZoneApplication.bccAverage2011.get(bcc).doubleValue() * radius.doubleValue();
-//        double  widthAvg = 2.0 * average + 1;
-//        // if the width is t
-//        if ( widthAvg > bitmapAvg.getWidth() - 10) {
-//          widthAvg = bitmapAvg.getWidth() - 10;
-//        }
-//        bitmapAvg = Bitmap.createBitmap(bitmapAvg, 0, 0, (int)widthAvg,
-//            bitmapAvg.getHeight());
-//
-//        avgImg.setImageBitmap(bitmapAvg);
-//        avgIncidentCol.addView(avgImg, iParams);
-//        
-//        TextView numAvg = new TextView(this);
-//        numAvg.setText(String.valueOf(average)); // get number of incidents
-//        numAvg.setLayoutParams(tParams);
-//        numAvg.setHeight(20);
-//        numAvg.setWidth(100);
-//        numAvg.setTypeface(Typeface.SANS_SERIF);
-//        numAvg.setTextSize(10f);
-//        numAvg.setTextColor(Color.GRAY);
-//        
-//        //tr.addView(numIncidents);
-//        avgIncidentCol.addView(numAvg);
-//        avgIncidentLayout.addView(avgIncidentCol);
-//        averageRow.addView(avgIncidentLayout);
-//        
-//        myLayout.addView(averageRow, new TableLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
-//            LayoutParams.WRAP_CONTENT));
+
       }
     }
 

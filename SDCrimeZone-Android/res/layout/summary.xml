@@ -49,7 +49,7 @@
             <ImageView
                 android:id="@+id/badResultsImage"
                 android:layout_width="150px"
-                android:layout_height="200px"
+                android:layout_height="150px"
                 android:src="@drawable/bad" />
 
             <LinearLayout
