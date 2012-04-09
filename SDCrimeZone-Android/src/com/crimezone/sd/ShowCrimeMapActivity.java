@@ -1,9 +1,5 @@
 package com.crimezone.sd;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,7 +53,7 @@ public class ShowCrimeMapActivity extends MapActivity {
     // Either satellite or 2d
     mapView.setSatellite(false);
     mapController = mapView.getController();
-    mapController.setZoom(15); // Zoon 1 is world view
+    mapController.setZoom(14); // Zoon 1 is world view
     locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     gps = new GeoUpdateHandler(currLocation);
     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, gps);
@@ -77,13 +73,10 @@ public class ShowCrimeMapActivity extends MapActivity {
         Double myLng = new Double(lng);
         String crime = SDCrimeZoneApplication.bccMap.get(obj.get("bcc").toString());
         String address = obj.get("address").toString();
-        Date date = new Date(Date.parse(obj.get("date").toString()));
-        DateFormat df = new SimpleDateFormat("dd MMM yyyy 'at' HH:mm");  
-        String formattedDate = df.format(date);
         int iLat = (int) (myLat.doubleValue() * 1E6);
         int iLng = (int) (myLng.doubleValue() * 1E6);
         // create the marker for Maps view
-        createMarker(iLat, iLng, crime, address + "\n" + formattedDate);
+        createMarker(iLat, iLng, crime, address);
       } catch (JSONException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();

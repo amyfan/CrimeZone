@@ -1,8 +1,10 @@
 package com.crimezone.sd;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -11,9 +13,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
-import org.json.JSONTokener;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
@@ -94,7 +96,8 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
     // Define a listener that responds to location updates
     LocationListener locationListener = new LocationListener() {
       public void onLocationChanged(Location location) {
-        // Called when a new location is found by the network location provider.
+        // Called when a new location is found by the network location
+        // provider.
         updateAddressWithCurrentLocation(location);
       }
 
@@ -110,7 +113,8 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
 
     // Register the listener with the Location Manager to receive location
     // updates
-    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+    locationManager
+        .requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
   }
 
   public void updateAddressWithCurrentLocation(Location location) {
@@ -145,13 +149,20 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
    */
   public void onClick(View v) {
     if (v.getId() == R.id.submitButton) {
+      
+      
+      
+      
       try {
-        JSONArray results = this.sendHttpRequestToServer(v);
+        ProgressDialog dialog = ProgressDialog.show(this, "", "Loading. Please wait...", true);
+        
+        String results = this.sendHttpRequestToServer(v);
         Intent intent = new Intent();
         Bundle bun = new Bundle();
+        
 
-        bun.putString("results", results.toString()); // add two parameters: a
-                                           // string and a boolean
+        bun.putString("results", results); // add two parameters: a
+        // string and a boolean
         EditText addr = (EditText) this.findViewById(R.id.addressText);
         String currentAddress = addr.getText().toString();
         double[] latlong = { 0, 0 };
@@ -179,13 +190,19 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
          */
         intent.setClass(this, SDCrimeSummaryActivity.class);
         intent.putExtras(bun);
+        
+        dialog.dismiss();
         startActivity(intent);
+        
+        
         // }
       } catch (Exception e) {
         e.printStackTrace();
         Toast addrNotFound = Toast.makeText(this, "Address Not Found", 5);
         addrNotFound.show();
       }
+      
+      
     }
 
   }
@@ -196,7 +213,7 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
    * page.
    * 
    **/
-  private JSONArray sendHttpRequestToServer(View v) {
+  private String sendHttpRequestToServer(View v) {
     // get the current GPS coordinates, distance, and dates selected
 
     JSONArray jsonObjs = new JSONArray();
@@ -217,30 +234,54 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
       }
       HttpResponse response;
       HttpClient hc = new DefaultHttpClient();
-      System.out.println("http://216.231.132.72/get.php?lat="
+      // SDCrimeZoneApplication.debug( this,
+      // "http://127.0.0.1:8888/SDCrimeZone_AppEngine.html?gwt.codesvr=127.0.0.1:9997/crimeZoneServlet?lat="
+      // + latlong[0]
+      // + "&lng=" + latlong[1] + "&rad=" + selectedRadius + "&year=" +
+      // selectedDate);
+
+      SDCrimeZoneApplication.debug(
+          this,
+          "HTTPGet = http://sdcrimezone.appspot.com/crimeZoneServlet?lat="
+              + String.valueOf(latlong[0]) + "&lng=" + String.valueOf(latlong[1]) + "&rad="
+              + selectedRadius + "&year=" + selectedDate);
+      HttpGet get = new HttpGet("http://sdcrimezone.appspot.com/crimeZoneServlet?lat="
           + String.valueOf(latlong[0]) + "&lng=" + String.valueOf(latlong[1]) + "&rad="
           + selectedRadius + "&year=" + selectedDate);
-      HttpGet get = new HttpGet("http://216.231.132.72/get.php?lat="
-          + String.valueOf(latlong[0]) + "&lng=" + String.valueOf(latlong[1]) + "&rad="
-          + selectedRadius + "&year=" + selectedDate);
+      // HttpGet get = new
+      // HttpGet("http://127.0.0.1:8888/SDCrimeZone_AppEngine.html?gwt.codesvr=127.0.0.1:9997/crimeZoneServlet?lat="
+      // + latlong[0]
+      // + "&lng=" + latlong[1] + "&rad=" + selectedRadius + "&year=" +
+      // selectedDate);
 
       response = hc.execute(get);
 
-      // get the response from the Google Apps Engine server, should be in JSON
+      // get the response from the Google Apps Engine server, should be in
+      // JSON
       // format
       if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-        Reader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent(),
-            "UTF-8"));
-        StringBuilder builder = new StringBuilder();
-        char[] buf = new char[1000];
-        int l = 0;
-        while (l >= 0) {
-          builder.append(buf, 0, l);
-          l = in.read(buf);
+        File responseFile = File.createTempFile("results", "json", this.getFilesDir());
+        // Buffers
+        BufferedReader bufReader = new BufferedReader(new InputStreamReader(response.getEntity()
+            .getContent()));
+        BufferedWriter bufWriter = new BufferedWriter(new FileWriter(responseFile));
+        int nbCharRead = 0;
+        int i = 0;
+        int totalRead = 0;
+        char[] buffer = new char[10000];
+
+        while ((nbCharRead = bufReader.read(buffer, 0, 10000)) != -1) {
+          totalRead += nbCharRead;
+          // System.out.println("buffer = " + String.valueOf(buffer));
+          bufWriter.write(buffer, 0, nbCharRead);
         }
-        JSONTokener tokener = new JSONTokener(builder.toString());
-        JSONArray finalResult = new JSONArray(tokener);
-        return finalResult;
+
+        if (bufWriter != null) {
+          bufWriter.flush();
+          bufWriter.close();
+        }
+
+        return responseFile.getPath();
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -251,9 +292,6 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
 
   private double[] getLatLong(String strAddress) {
     Geocoder coder = new Geocoder(this);
-    if (coder == null) {
-      System.err.println("Geocoder not found");
-    }
     List<Address> address;
 
     try {
