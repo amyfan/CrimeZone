@@ -66,7 +66,7 @@ public class ShowCrimeMapActivity extends MapActivity {
     // Either satellite or 2d
     mapView.setSatellite(false);
     mapController = mapView.getController();
-    mapController.setZoom(15); // Zoon 1 is world view
+    mapController.setZoom(14); // Zoon 1 is world view
     locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     gps = new GeoUpdateHandler(currLocation);
     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, gps);

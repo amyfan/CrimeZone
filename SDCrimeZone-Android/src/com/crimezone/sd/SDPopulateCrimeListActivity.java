@@ -16,6 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -44,6 +45,8 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
+    ProgressDialog dialog = ProgressDialog.show(this, "", "Loading. Please wait...", true);
+    
     super.onCreate(savedInstanceState);
     
     JSONArray results = null;
@@ -60,6 +63,7 @@ public class SDPopulateCrimeListActivity extends Activity implements View.OnClic
     } 
     Button viewMapButton = (Button) this.findViewById(R.id.viewMapButton);
     viewMapButton.setOnClickListener(this);
+    dialog.dismiss();
   }
   
   /**
