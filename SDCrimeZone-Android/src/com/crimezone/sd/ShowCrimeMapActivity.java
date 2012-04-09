@@ -10,7 +10,10 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.widget.RelativeLayout;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.FrameLayout;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -23,8 +26,31 @@ public class ShowCrimeMapActivity extends MapActivity {
   private MapController mapController;
   private MapView mapView;
   private LocationManager locationManager;
-  private CrimeMapOverlay itemizedoverlay;
+  private CrimeMapOverlay violentCrimeOverlay;
+  private CrimeMapOverlay propertyCrimeOverlay;
+  private CrimeMapOverlay otherCrimeOverlay;
   private GeoUpdateHandler gps;
+  private Button violentCrimeButton;
+  private Button propertyCrimeButton;
+  private Button otherCrimeButton;
+  private Boolean violentIsDisplayed = false;
+  private Boolean propertyIsDisplayed = false;
+  private Boolean otherIsDisplayed = false;
+
+  // private Button burglaryButton; // property
+  // private Button theftButton; // property
+  // private Button arsonButton; // property
+  // private Button otherCrimesButton; // other
+  // private Button childAndFamilyButton; // other
+  // private Button deadlyWeaponButton; // other
+  // private Button embezzleButton; // other
+  // private Button fraudButton; // other
+  // private Button gamblingButton; // other
+  // private Button maliciousMischiefButton; // other
+  // private Button narcoticsButton; // other
+  // private Button sexCrimesButton; // other
+  // private Button forgeryButton; // other
+  // private Button otherNonCriminalCodeButton; // other
 
   public void onCreate(Bundle bundle) {
     super.onCreate(bundle);
@@ -44,12 +70,12 @@ public class ShowCrimeMapActivity extends MapActivity {
     GeoPoint currLocation = SDCrimeZoneApplication.getGeoPoint(startLat, startLng);
 
     // create a map view
-    RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.mapViewLayout);
+    FrameLayout relativeLayout = (FrameLayout) findViewById(R.id.mapViewLayout);
     mapView = (MapView) findViewById(R.id.mapView);
     mapView.setBuiltInZoomControls(true);
     mapView.getOverlays().add(
-        new CircleMapOverlay(this, Double.valueOf(startLat).doubleValue(), Double.valueOf(startLng).doubleValue(), 
-            Float.valueOf(radius).floatValue()));
+        new CircleMapOverlay(this, Double.valueOf(startLat).doubleValue(), Double.valueOf(startLng)
+            .doubleValue(), Float.valueOf(radius).floatValue()));
     // Either satellite or 2d
     mapView.setSatellite(false);
     mapController = mapView.getController();
@@ -59,31 +85,41 @@ public class ShowCrimeMapActivity extends MapActivity {
     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, gps);
 
     Drawable drawable = this.getResources().getDrawable(R.drawable.point);
-    itemizedoverlay = new CrimeMapOverlay(drawable, this);
-    // create current location marker
-    // createMarker();
-    for (int i = 0; i < results.length(); i++) {
-      JSONObject obj;
-      try {
-        obj = results.getJSONObject(i);
-        String lng = obj.get("lng").toString();
-        String lat = obj.get("lat").toString();
-        //SDCrimeZoneApplication.debug(this, "mapping " + lat + ", " + lng);
-        Double myLat = new Double(lat);
-        Double myLng = new Double(lng);
-        String crime = SDCrimeZoneApplication.bccMap.get(obj.get("bcc").toString());
-        String address = obj.get("address").toString();
-        int iLat = (int) (myLat.doubleValue() * 1E6);
-        int iLng = (int) (myLng.doubleValue() * 1E6);
-        // create the marker for Maps view
-        createMarker(iLat, iLng, crime, address);
-      } catch (JSONException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-    }
-    mapView.getOverlays().add(itemizedoverlay);
 
+    violentCrimeOverlay = new CrimeMapOverlay(drawable, this);
+    // mapView.getOverlays().add(violentCrimeOverlay);
+
+    propertyCrimeOverlay = new CrimeMapOverlay(drawable, this);
+    // mapView.getOverlays().add(propertyCrimeOverlay);
+
+    otherCrimeOverlay = new CrimeMapOverlay(drawable, this);
+    // mapView.getOverlays().add(otherCrimeOverlay);
+
+    populateCrimeOverlays(results);
+
+    // Button to control food overlay
+    violentCrimeButton = (Button) findViewById(R.id.showViolent);
+    violentCrimeButton.setOnClickListener(new OnClickListener() {
+      public void onClick(View v) {
+        toggleOverlay(violentCrimeOverlay, violentIsDisplayed);
+      }
+    });
+
+    // Button to control access overlay
+    propertyCrimeButton = (Button) findViewById(R.id.showProperty);
+    propertyCrimeButton.setOnClickListener(new OnClickListener() {
+      public void onClick(View v) {
+        toggleOverlay(propertyCrimeOverlay, propertyIsDisplayed);
+      }
+    });
+
+    // Button to control access overlay
+    otherCrimeButton = (Button) findViewById(R.id.showOther);
+    otherCrimeButton.setOnClickListener(new OnClickListener() {
+      public void onClick(View v) {
+        toggleOverlay(otherCrimeOverlay, otherIsDisplayed);
+      }
+    });
   }
 
   public void onPause() {
@@ -119,12 +155,65 @@ public class ShowCrimeMapActivity extends MapActivity {
     }
   }
 
-  private void createMarker(int lat, int lng, String title, String subtext) {
+  private void populateCrimeOverlays(JSONArray results) {
+    // create current location marker
+    // createMarker();
+    for (int i = 0; i < results.length(); i++) {
+      JSONObject obj;
+      try {
+        obj = results.getJSONObject(i);
+        String lng = obj.get("lng").toString();
+        String lat = obj.get("lat").toString();
+        // SDCrimeZoneApplication.debug(this, "mapping " + lat + ", " + lng);
+        Double myLat = new Double(lat);
+        Double myLng = new Double(lng);
+        // String crime =
+        // SDCrimeZoneApplication.bccMap.get(obj.get("bcc").toString());
+        BccCodeEnum crimeEnum = BccCodeEnum.fromCode(obj.get("bcc").toString());
+        String address = obj.get("address").toString();
+        int iLat = (int) (myLat.doubleValue() * 1E6);
+        int iLng = (int) (myLng.doubleValue() * 1E6);
+        // create the marker for Maps view
 
-    GeoPoint p = new GeoPoint(lat, lng);
+        OverlayItem overlayItem = createMarker(iLat, iLng, crimeEnum.getName(), address);
 
-    OverlayItem overlayitem = new OverlayItem(p, title, subtext);
-    itemizedoverlay.addOverlay(overlayitem);
-    
+        switch (crimeEnum) {
+        case MURDER:
+        case RAPE:
+        case ROBBERY:
+        case ASSAULT:
+          violentCrimeOverlay.addOverlay(overlayItem);
+          break;
+        case BURGLARY:
+        case THEFT:
+        case ARSON:
+          propertyCrimeOverlay.addOverlay(overlayItem);
+          break;
+        default:
+          otherCrimeOverlay.addOverlay(overlayItem);
+        }
+      } catch (JSONException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
   }
+
+  private OverlayItem createMarker(int lat, int lng, String title, String subtext) {
+    GeoPoint p = new GeoPoint(lat, lng);
+    OverlayItem overlayItem = new OverlayItem(p, title, subtext);
+    return overlayItem;
+  }
+
+  public void toggleOverlay(CrimeMapOverlay overlay, Boolean isDisplayed) {
+    if (!isDisplayed) {
+      mapView.getOverlays().add(overlay);
+    } else {
+      mapView.getOverlays().remove(overlay);
+    }
+    isDisplayed = !isDisplayed;
+    // Added symbols will be displayed when map is redrawn so force redraw now
+    mapView.postInvalidate();
+  }
+
 }

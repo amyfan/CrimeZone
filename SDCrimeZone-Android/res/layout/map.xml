@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:id="@+id/mapViewLayout" >
@@ -12,5 +12,28 @@
         android:clickable="true"
         android:apiKey="0lLL5x5sFKlc9m8Nimg0E_W1XeOy_omIObV6_HA"
         />
+    
+    <Button android:id="@+id/showViolent"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30px"
+        android:layout_weight="1.0" 
+        android:textSize="12sp"   
+        android:text="Violent" />
+    
+    <Button android:id="@+id/showProperty"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.0"
+        android:textSize="12sp" 
+        android:text="Property" />
+    
+    <Button android:id="@+id/showOther"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="30px"
+        android:layout_weight="1.0"
+        android:textSize="12sp" 
+        android:text="Other" />
 
-</RelativeLayout>
+</FrameLayout>

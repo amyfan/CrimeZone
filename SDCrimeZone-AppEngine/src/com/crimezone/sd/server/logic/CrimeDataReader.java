@@ -82,22 +82,23 @@ public class CrimeDataReader {
     return averages;
   }
 
-public IncidentsOneMile findIncidentsByCloseLatitudeLongitude(Double latitude,
-		Double longitude, Integer radius) {
-	
-	for (double lat = 32.5011583; lat <= 34.9359403; lat += 0.115942) {
-		for (double lng  = -120.43924; lng <= -116.7025101; lng += 0.115942) {
-			if (Math.abs(latitude.doubleValue() - lat) <= 0.115942) {
-				if (Math.abs(longitude.doubleValue() - lng) <= 0.115942) {
-					
-					List<IncidentsOneMile> incidents = crimeDao.findAllIncidentsByOneMile(String.format("%.3f", lat), String.format("%.3f", lng));
-					System.out.println(incidents.get(0).getResult());
-					return incidents.get(0);
-				}
-			}
-		}
-	}
-	return null;
-}
+  public IncidentsOneMile findIncidentsByCloseLatitudeLongitude(Double latitude, Double longitude,
+      Integer radius) {
+
+    for (double lat = 32.5011583; lat <= 34.9359403; lat += 0.115942) {
+      for (double lng = -120.43924; lng <= -116.7025101; lng += 0.115942) {
+        if (Math.abs(latitude.doubleValue() - lat) <= 0.115942) {
+          if (Math.abs(longitude.doubleValue() - lng) <= 0.115942) {
+
+            List<IncidentsOneMile> incidents = crimeDao.findAllIncidentsByOneMile(
+                String.format("%.3f", lat), String.format("%.3f", lng));
+            System.out.println(incidents.get(0).getResult());
+            return incidents.get(0);
+          }
+        }
+      }
+    }
+    return null;
+  }
 
 }
