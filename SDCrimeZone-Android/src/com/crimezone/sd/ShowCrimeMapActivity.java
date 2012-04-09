@@ -5,6 +5,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
@@ -37,21 +39,6 @@ public class ShowCrimeMapActivity extends MapActivity {
   private Boolean propertyIsDisplayed = false;
   private Boolean otherIsDisplayed = false;
 
-  // private Button burglaryButton; // property
-  // private Button theftButton; // property
-  // private Button arsonButton; // property
-  // private Button otherCrimesButton; // other
-  // private Button childAndFamilyButton; // other
-  // private Button deadlyWeaponButton; // other
-  // private Button embezzleButton; // other
-  // private Button fraudButton; // other
-  // private Button gamblingButton; // other
-  // private Button maliciousMischiefButton; // other
-  // private Button narcoticsButton; // other
-  // private Button sexCrimesButton; // other
-  // private Button forgeryButton; // other
-  // private Button otherNonCriminalCodeButton; // other
-
   public void onCreate(Bundle bundle) {
     super.onCreate(bundle);
     setContentView(R.layout.map); // bind the layout to the activity
@@ -79,7 +66,7 @@ public class ShowCrimeMapActivity extends MapActivity {
     // Either satellite or 2d
     mapView.setSatellite(false);
     mapController = mapView.getController();
-    mapController.setZoom(14); // Zoon 1 is world view
+    mapController.setZoom(15); // Zoon 1 is world view
     locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     gps = new GeoUpdateHandler(currLocation);
     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, gps);
@@ -101,7 +88,7 @@ public class ShowCrimeMapActivity extends MapActivity {
     violentCrimeButton = (Button) findViewById(R.id.showViolent);
     violentCrimeButton.setOnClickListener(new OnClickListener() {
       public void onClick(View v) {
-        toggleOverlay(violentCrimeOverlay, violentIsDisplayed);
+        toggleViolentOverlay();
       }
     });
 
@@ -109,7 +96,7 @@ public class ShowCrimeMapActivity extends MapActivity {
     propertyCrimeButton = (Button) findViewById(R.id.showProperty);
     propertyCrimeButton.setOnClickListener(new OnClickListener() {
       public void onClick(View v) {
-        toggleOverlay(propertyCrimeOverlay, propertyIsDisplayed);
+        togglePropertyOverlay();
       }
     });
 
@@ -117,7 +104,7 @@ public class ShowCrimeMapActivity extends MapActivity {
     otherCrimeButton = (Button) findViewById(R.id.showOther);
     otherCrimeButton.setOnClickListener(new OnClickListener() {
       public void onClick(View v) {
-        toggleOverlay(otherCrimeOverlay, otherIsDisplayed);
+        toggleOtherOverlay();
       }
     });
   }
@@ -156,8 +143,6 @@ public class ShowCrimeMapActivity extends MapActivity {
   }
 
   private void populateCrimeOverlays(JSONArray results) {
-    // create current location marker
-    // createMarker();
     for (int i = 0; i < results.length(); i++) {
       JSONObject obj;
       try {
@@ -169,28 +154,38 @@ public class ShowCrimeMapActivity extends MapActivity {
         Double myLng = new Double(lng);
         // String crime =
         // SDCrimeZoneApplication.bccMap.get(obj.get("bcc").toString());
-        BccCodeEnum crimeEnum = BccCodeEnum.fromCode(obj.get("bcc").toString());
-        String address = obj.get("address").toString();
-        int iLat = (int) (myLat.doubleValue() * 1E6);
-        int iLng = (int) (myLng.doubleValue() * 1E6);
-        // create the marker for Maps view
+        try {
+          BccCodeEnum crimeEnum = BccCodeEnum.fromCode(obj.get("bcc").toString());
 
-        OverlayItem overlayItem = createMarker(iLat, iLng, crimeEnum.getName(), address);
+          String address = obj.get("address").toString();
+          // Date date = new Date(Date.parse(obj.get("date").toString()));
+          // DateFormat df = new SimpleDateFormat("dd MMM yyyy 'at' HH:mm");
+          // String formattedDate = df.format(date);
+          String formattedDate = "dummy date";
+          int iLat = (int) (myLat.doubleValue() * 1E6);
+          int iLng = (int) (myLng.doubleValue() * 1E6);
+          // create the marker for Maps view
+          createMarker(iLat, iLng, crimeEnum.getName(), address + "\n" + formattedDate);
+          OverlayItem overlayItem = createMarker(iLat, iLng, crimeEnum.getName(), address);
 
-        switch (crimeEnum) {
-        case MURDER:
-        case RAPE:
-        case ROBBERY:
-        case ASSAULT:
-          violentCrimeOverlay.addOverlay(overlayItem);
-          break;
-        case BURGLARY:
-        case THEFT:
-        case ARSON:
-          propertyCrimeOverlay.addOverlay(overlayItem);
-          break;
-        default:
-          otherCrimeOverlay.addOverlay(overlayItem);
+          switch (crimeEnum) {
+          case MURDER:
+          case RAPE:
+          case ROBBERY:
+          case ASSAULT:
+            violentCrimeOverlay.addOverlay(overlayItem);
+            break;
+          case BURGLARY:
+          case THEFT:
+          case ARSON:
+            propertyCrimeOverlay.addOverlay(overlayItem);
+            break;
+          default:
+            otherCrimeOverlay.addOverlay(overlayItem);
+          }
+        } catch (IllegalArgumentException e) {
+          // BCC code not in our system
+          continue;
         }
       } catch (JSONException e) {
         // TODO Auto-generated catch block
@@ -205,13 +200,41 @@ public class ShowCrimeMapActivity extends MapActivity {
     return overlayItem;
   }
 
-  public void toggleOverlay(CrimeMapOverlay overlay, Boolean isDisplayed) {
-    if (!isDisplayed) {
-      mapView.getOverlays().add(overlay);
+  public void toggleViolentOverlay() {
+    if (!violentIsDisplayed) {
+      mapView.getOverlays().add(violentCrimeOverlay);
+      violentCrimeButton.getBackground().setColorFilter(Color.LTGRAY, Mode.MULTIPLY);
     } else {
-      mapView.getOverlays().remove(overlay);
+      mapView.getOverlays().remove(violentCrimeOverlay);
+      violentCrimeButton.getBackground().setColorFilter(Color.WHITE, Mode.MULTIPLY);
     }
-    isDisplayed = !isDisplayed;
+    violentIsDisplayed = !violentIsDisplayed;
+    // Added symbols will be displayed when map is redrawn so force redraw now
+    mapView.postInvalidate();
+  }
+
+  public void togglePropertyOverlay() {
+    if (!propertyIsDisplayed) {
+      mapView.getOverlays().add(propertyCrimeOverlay);
+      propertyCrimeButton.getBackground().setColorFilter(Color.LTGRAY, Mode.MULTIPLY);
+    } else {
+      mapView.getOverlays().remove(propertyCrimeOverlay);
+      propertyCrimeButton.getBackground().setColorFilter(Color.WHITE, Mode.MULTIPLY);
+    }
+    propertyIsDisplayed = !propertyIsDisplayed;
+    // Added symbols will be displayed when map is redrawn so force redraw now
+    mapView.postInvalidate();
+  }
+
+  public void toggleOtherOverlay() {
+    if (!otherIsDisplayed) {
+      mapView.getOverlays().add(otherCrimeOverlay);
+      otherCrimeButton.getBackground().setColorFilter(Color.LTGRAY, Mode.MULTIPLY);
+    } else {
+      mapView.getOverlays().remove(otherCrimeOverlay);
+      otherCrimeButton.getBackground().setColorFilter(Color.WHITE, Mode.MULTIPLY);
+    }
+    otherIsDisplayed = !otherIsDisplayed;
     // Added symbols will be displayed when map is redrawn so force redraw now
     mapView.postInvalidate();
   }

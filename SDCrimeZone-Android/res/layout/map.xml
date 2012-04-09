@@ -12,7 +12,14 @@
         android:clickable="true"
         android:apiKey="0lLL5x5sFKlc9m8Nimg0E_W1XeOy_omIObV6_HA"
         />
-    
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" 
+        android:padding="0px"           
+        >
+
     <Button android:id="@+id/showViolent"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -36,4 +43,5 @@
         android:textSize="12sp" 
         android:text="Other" />
 
+    </LinearLayout>
 </FrameLayout>
