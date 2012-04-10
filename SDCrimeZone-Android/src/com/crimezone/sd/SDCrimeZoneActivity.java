@@ -33,6 +33,7 @@ import android.widget.Toast;
 public class SDCrimeZoneActivity extends Activity implements View.OnClickListener {
 
   public static Location currLocation;
+  public static Address _manualAddress;
   public static String selectedRadius;
   public static String selectedDate;
   public LocationManager locationManager;
@@ -61,6 +62,7 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
     // get current GPS coordinates and set as default for app
     EditText currLocationText = (EditText) this.findViewById(R.id.addressText);
     currLocationText.setText(getString(R.string.defaultLocation));
+    currLocationText.selectAll();
     // the distance dropdown list
     Spinner distanceList = (Spinner) this.findViewById(R.id.distanceList);
     populateSpinnerWithArray(distanceList, R.array.distanceArray);
@@ -104,7 +106,7 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
       public void onLocationChanged(Location location) {
         // Called when a new location is found by the network location
         // provider.
-        updateAddressWithCurrentLocation(location);
+        locationWasDetected(location);
       }
 
       public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -122,14 +124,23 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
   }
 
-  public void updateAddressWithCurrentLocation(Location location) {
-    EditText addrText = (EditText) this.findViewById(R.id.addressText);
-    if (addrText != null
-        && addrText.getText().toString().equals(getString(R.string.defaultLocation))) {
+  public void locationWasDetected(Location location) {
+    if (usingLocationDetection()) {
       currLocation = location;
     }
     // this.debug("Location= " + String.valueOf(location.getLatitude())
     // + ", " + String.valueOf(location.getLongitude()));
+  }
+
+  private boolean usingLocationDetection() {
+    EditText addrText = (EditText) this.findViewById(R.id.addressText);
+    if (addrText != null
+        && addrText.getText().toString().equals(getString(R.string.defaultLocation))
+    ) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /**
@@ -168,12 +179,25 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
         EditText addr = (EditText) this.findViewById(R.id.addressText);
         String currentAddress = addr.getText().toString();
         double[] latlong = { 0, 0 };
-        if (currLocation != null) {
-          latlong[0] = currLocation.getLatitude();
-          latlong[1] = currLocation.getLongitude();
-          if (!currentAddress.equals(getString(R.string.defaultLocation))) {
-            latlong = getLatLong(currentAddress);
+        
+        if (usingLocationDetection()) {
+          if ((currLocation == null)) {
+            Toast noLocationYet = Toast.makeText(this, "Location Service is still determining your position", 5);
+            noLocationYet.show();
+            dialog.dismiss();
+            return;
+          } else { //Location obtained
+            SDCrimeZoneApplication.debug(this, "Using detected location");
+            latlong[0] = currLocation.getLatitude();
+            latlong[1] = currLocation.getLongitude();
+            if (!currentAddress.equals(getString(R.string.defaultLocation))) {
+              latlong = getLatLong(currentAddress);
+            }
           }
+        } else { //using manually entered address
+          SDCrimeZoneApplication.debug(this, "Using manually entered location");
+          latlong[0] = _manualAddress.getLatitude();
+          latlong[1] = _manualAddress.getLongitude();
         }
 
         bun.putString("startLat", String.valueOf(latlong[0]));
@@ -181,14 +205,36 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
         bun.putString("year", selectedDate);
         bun.putString("radius", selectedRadius);
 
+         
         /*
          * Check if the current address entered is actually in San Diego
          * 
          *  Fixing issue where the following lat/long is excluded
          *  http://216.231.132.72/get.php?lat=32.7742488&lng=-117.1411815&rad=1&year=2011
-         *  Works now
+         *  //Apparent lat/long of Mike's House lat=32.74999737739563 lng=-117.23599791526794
          */
-
+        
+        /* raw old code*/ 
+        /*
+        if (latlong[0] >= 33.427045 || latlong[1] <= -117.612003 || latlong[0] <= 32
+            || latlong[1] >= -116.0775811) {
+         */ 
+          
+       
+        
+        /*  old code prettied up*/
+        /*
+        if (
+            latlong[0] >= 33.427045 || 
+            latlong[0] <= 32 || 
+            
+            latlong[1] <= -117.612003 ||
+            latlong[1] >= -116.0775811
+            ) {
+         */
+        
+        
+        /*  Final version that was supposed to work, but now who knows.
         if (
             latlong[0] <= 32 ||
             33.427045 <= latlong[0] || 
@@ -196,18 +242,40 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
             latlong[1] <= -117.612003 || 
             -116.0775811 <= latlong[1]
             ) 
-        {
-          
+        {*/
+        
+        
+        //Ugly answer for ugly  problem
+        boolean exclusionTestFailed = false;
+        
+        if (latlong[0] <= 32) {
+          SDCrimeZoneApplication.debug(this, "Failed FIRST lat/long exclusion test");
+          exclusionTestFailed = true;
+        }
+        
+        if (33.427045 <= latlong[0]) {
+          SDCrimeZoneApplication.debug(this, "Failed SECOND lat/long exclusion test");
+          exclusionTestFailed = true;
+        }  
+        
+        if (latlong[1] <= -117.612003) {
+          SDCrimeZoneApplication.debug(this, "Failed THIRD lat/long exclusion test");
+          exclusionTestFailed = true;
+        } 
+        
+        if (-116.0775811 <= latlong[1]) {
+          SDCrimeZoneApplication.debug(this, "Failed FOURTH lat/long exclusion test");
+          exclusionTestFailed = true;
+        }
+        
+        if (exclusionTestFailed) {
           //dialog.dismiss();  //Delete line if dialog works now
-          
           Toast notInSD = Toast.makeText(this, "Currently only supporting San Diego locations", 5);
           notInSD.show();
-        } else {
-
+        } else {  //Location obtained and was not excluded
           intent.setClass(this, SDCrimeSummaryActivity.class);
           intent.putExtras(bun);
 
-          
           startActivity(intent);
 
         }
@@ -248,21 +316,17 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
       }
       HttpResponse response;
       HttpClient hc = new DefaultHttpClient();
-
-      System.out.println("http://216.231.132.72/get.php?lat=" + String.valueOf(latlong[0])
+      
+      String httpGetStr = "http://216.231.132.72/get.php?lat=" + String.valueOf(latlong[0])
           + "&lng=" + String.valueOf(latlong[1]) + "&rad=" + selectedRadius + "&year="
-          + selectedDate);
-
-      HttpGet get = new HttpGet("http://216.231.132.72/get.php?lat=" + String.valueOf(latlong[0])
-          + "&lng=" + String.valueOf(latlong[1]) + "&rad=" + selectedRadius + "&year="
-          + selectedDate);
-
+          + selectedDate;
+      
+      SDCrimeZoneApplication.debug(this, httpGetStr);
+      HttpGet get = new HttpGet(httpGetStr);
       response = hc.execute(get);
 
       // get the response from the Google Apps Engine server, should be in
-      Reader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent(),
-
-      "UTF-8"));
+      Reader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent(),"UTF-8"));
 
       StringBuilder builder = new StringBuilder();
 
@@ -290,15 +354,23 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
 
   private double[] getLatLong(String strAddress) {
     Geocoder coder = new Geocoder(this);
-    List<Address> address;
+    List<Address> resolvedAddresses;
 
     try {
-      address = coder.getFromLocationName(strAddress, 5);
-      if (address == null) {
+      resolvedAddresses = coder.getFromLocationName(strAddress, 5);
+      if (resolvedAddresses == null) {
         return null;
       }
-      Address location = address.get(0);
-      double[] results = { location.getLatitude(), location.getLongitude() };
+      
+      _manualAddress = resolvedAddresses.get(0); //Hoping the first one works
+      double[] results = { _manualAddress.getLatitude(), _manualAddress.getLongitude() };
+      
+      String strMessage = "Resolved address ["+ strAddress 
+      +"] to lat["+ _manualAddress.getLatitude()
+      +"] long["+ _manualAddress.getLongitude() +"]";
+      
+      SDCrimeZoneApplication.debug(this, strMessage);
+      
       return results;
     } catch (Exception e) {
       return null;
