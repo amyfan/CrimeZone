@@ -87,7 +87,7 @@ public class ShowCrimeMapActivity extends MapActivity {
       public void onClick(View v) {
         toggleViolentOverlay();
       }
-    });
+    }); 
 
     // Button to control access overlay
     propertyCrimeButton = (Button) findViewById(R.id.showProperty);

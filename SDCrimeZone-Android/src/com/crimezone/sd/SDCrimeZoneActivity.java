@@ -154,9 +154,10 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
    */
   public void onClick(View v) {
     if (v.getId() == R.id.submitButton) {
-
+      ProgressDialog dialog = ProgressDialog.show(this, "", "Loading. Please wait...", true);
+      
       try {
-        ProgressDialog dialog = ProgressDialog.show(this, "", "Loading. Please wait...", true);
+        
 
         JSONArray results = this.sendHttpRequestToServer(v);
         Intent intent = new Intent();
@@ -182,11 +183,23 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
 
         /*
          * Check if the current address entered is actually in San Diego
+         * 
+         *  Fixing issue where the following lat/long is excluded
+         *  http://216.231.132.72/get.php?lat=32.7742488&lng=-117.1411815&rad=1&year=2011
+         *  Works now
          */
 
-        if (latlong[0] >= 33.427045 || latlong[1] <= -117.612003 || latlong[0] <= 32
-            || latlong[1] >= -116.0775811) {
-          dialog.dismiss();
+        if (
+            latlong[0] <= 32 ||
+            33.427045 <= latlong[0] || 
+            
+            latlong[1] <= -117.612003 || 
+            -116.0775811 <= latlong[1]
+            ) 
+        {
+          
+          //dialog.dismiss();  //Delete line if dialog works now
+          
           Toast notInSD = Toast.makeText(this, "Currently only supporting San Diego locations", 5);
           notInSD.show();
         } else {
@@ -194,7 +207,7 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
           intent.setClass(this, SDCrimeSummaryActivity.class);
           intent.putExtras(bun);
 
-          dialog.dismiss();
+          
           startActivity(intent);
 
         }
@@ -203,7 +216,7 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
         Toast addrNotFound = Toast.makeText(this, "Address Not Found", 5);
         addrNotFound.show();
       }
-
+      dialog.dismiss();
     }
 
   }

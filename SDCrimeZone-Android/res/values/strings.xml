@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">San Diego Crime Stats</string>
-    <string name="currLocation">Address</string>
+    <string name="currLocation">Street Address (or Zip code)</string>
     <string name="defaultLocation">Current Location</string>
     <string name="distance">Distance</string>
     <string name="dateBackTo">Dating Back To</string>
