@@ -1,5 +1,10 @@
 package com.crimezone.sd;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -161,15 +166,22 @@ public class ShowCrimeMapActivity extends MapActivity {
           BccCodeEnum crimeEnum = BccCodeEnum.fromCode(obj.get("bcc").toString());
 
           String address = obj.get("address").toString();
-          // Date date = new Date(Date.parse(obj.get("date").toString()));
-          // DateFormat df = new SimpleDateFormat("dd MMM yyyy 'at' HH:mm");
-          // String formattedDate = df.format(date);
-          String formattedDate = "dummy date";
+          
+          DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+          Date date = df.parse((obj.get("date").toString()));
+          //System.out.println("got date: " + date.toString());
+          //DateFormat df = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");  
+          //String formattedDate = df.format(date);
+          String formattedDate = "";
+          if (date != null) {
+            formattedDate = date.toString();
+            System.out.println("date = " + formattedDate);
+          }
+          
           int iLat = (int) (myLat.doubleValue() * 1E6);
           int iLng = (int) (myLng.doubleValue() * 1E6);
           // create the marker for Maps view
-          createMarker(iLat, iLng, crimeEnum.getName(), address + "\n" + formattedDate);
-          OverlayItem overlayItem = createMarker(iLat, iLng, crimeEnum.getName(), address);
+          OverlayItem overlayItem = createMarker(iLat, iLng, crimeEnum.getName(), address + "\n " + formattedDate);
 
           switch (crimeEnum) {
           case MURDER:
@@ -189,6 +201,9 @@ public class ShowCrimeMapActivity extends MapActivity {
         } catch (IllegalArgumentException e) {
           // BCC code not in our system
           continue;
+        } catch (ParseException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
         }
       } catch (JSONException e) {
         // TODO Auto-generated catch block
