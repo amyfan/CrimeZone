@@ -62,7 +62,6 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
     // get current GPS coordinates and set as default for app
     EditText currLocationText = (EditText) this.findViewById(R.id.addressText);
     currLocationText.setText(getString(R.string.defaultLocation));
-    currLocationText.selectAll();
     // the distance dropdown list
     Spinner distanceList = (Spinner) this.findViewById(R.id.distanceList);
     populateSpinnerWithArray(distanceList, R.array.distanceArray);
@@ -121,6 +120,10 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
 
     // Register the listener with the Location Manager to receive location
     // updates
+    registerForLocationUpdates();
+  }
+
+  private void registerForLocationUpdates() {
     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
   }
 
@@ -148,6 +151,8 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
     super.onResume();
     EditText addrText = (EditText) this.findViewById(R.id.addressText);
     addrText.setText(getString(R.string.defaultLocation));
+    addrText.selectAll();
+    registerForLocationUpdates();
   }
 
   /**
