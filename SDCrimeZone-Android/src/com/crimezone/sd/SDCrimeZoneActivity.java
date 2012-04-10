@@ -142,6 +142,13 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
       return false;
     }
   }
+  
+  @Override
+  public void onResume() {
+    super.onResume();
+    EditText addrText = (EditText) this.findViewById(R.id.addressText);
+    addrText.setText(getString(R.string.defaultLocation));
+  }
 
   /**
    * populateSpinnerWithArray Populates dropdown boxes with options, based on

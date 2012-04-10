@@ -118,7 +118,7 @@ public class ShowCrimeMapActivity extends MapActivity {
   public void onDestroy() {
     super.onDestroy();
   }
-
+  
   @Override
   protected boolean isRouteDisplayed() {
     return false;
