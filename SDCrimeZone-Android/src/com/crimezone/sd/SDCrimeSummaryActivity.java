@@ -188,7 +188,7 @@ public class SDCrimeSummaryActivity extends Activity implements View.OnClickList
         }
 
         // if less than 3% of this type of crime, than show under good results
-        if (percentage < 3.0 * radius.doubleValue()) {
+        if (percentage < 3.0 * radius.doubleValue() * radius.doubleValue()) {
           n.setTextColor(Color.GREEN);
           if (incidentMap.get(bcc) == null || incidentMap.get(bcc).doubleValue() == 0.0) {
             goodIncidents.add(bcc);

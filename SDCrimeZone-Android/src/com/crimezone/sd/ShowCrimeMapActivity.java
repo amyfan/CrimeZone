@@ -181,7 +181,7 @@ public class ShowCrimeMapActivity extends MapActivity {
           int iLat = (int) (myLat.doubleValue() * 1E6);
           int iLng = (int) (myLng.doubleValue() * 1E6);
           // create the marker for Maps view
-          OverlayItem overlayItem = createMarker(iLat, iLng, crimeEnum.getName(), address + "\n " + formattedDate);
+          OverlayItem overlayItem = createMarker(iLat, iLng, crimeEnum.getName(), address + "\n( " + formattedDate + ")");
 
           switch (crimeEnum) {
           case MURDER:

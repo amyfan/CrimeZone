@@ -8,8 +8,9 @@
     <string name="dateBackTo">Dating Back To</string>
 
     <string-array name="distanceArray">
+        <item>0.5 mile</item>
         <item>1 mile</item>
-        <item>2 mile</item>
+        <item>1.5 mile</item>
     </string-array>
     <string-array name="dateArray">
         <item>2011</item>

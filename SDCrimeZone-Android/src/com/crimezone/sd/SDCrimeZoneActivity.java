@@ -72,11 +72,12 @@ public class SDCrimeZoneActivity extends Activity implements View.OnClickListene
       }
 
       public void onNothingSelected(AdapterView<?> parent) {
-        parent.setSelection(0);
+        parent.setSelection(1);
         selectedRadius = parent.getSelectedItem().toString();
         selectedRadius = selectedRadius.replaceFirst("\\smile", "");
       }
     });
+    distanceList.setSelection(1);
 
     // the distance dropdown list
     Spinner dateList = (Spinner) this.findViewById(R.id.datesList);
